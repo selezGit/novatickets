@@ -1,4 +1,3 @@
-from email.policy import default
 import uuid
 
 from db.postgres import Base
@@ -12,7 +11,7 @@ class Event(Base):
     __tablename__ = "events"
     __table_args__ = {"extend_existing": True}
 
-    id = Column(
+    uid = Column(
         UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4,

@@ -1,13 +1,12 @@
 import streamlit as st
 from core.config import *
+
 from view.base import BaseView
 
 
 class AddEvent(BaseView):
-    def add_event(self):
-
-        self.side_bar()
-        with st.expander("Info", expanded=True):
+    def add_form(self):
+        with st.form("Add_form"):
             start, end = self.combine_datetime()
             st.markdown(
                 f"""
@@ -27,7 +26,7 @@ class AddEvent(BaseView):
                 autocomplete="email",
             )
 
-            submit = st.button("Submit", key="add_event_btn")
+            submit = st.form_submit_button("Submit")
 
             if submit:
                 if not email:
@@ -42,7 +41,12 @@ class AddEvent(BaseView):
                     ):
                         st.success("На указанный email отправлено письмо для подтверждения события")
                     else:
-                        st.error("Данный слот уже занят")
+                        st.error("Рабочее место на указанную дату уже занято")
+
+    def main_add(self):
+
+        self.side_bar()
+        self.add_form()
 
         with st.expander(f"Room {st.session_state.room}", expanded=True):
             st.image(

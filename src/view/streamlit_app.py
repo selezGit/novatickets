@@ -4,16 +4,18 @@ from streamlit_option_menu import option_menu
 
 from view.add import AddEvent
 from view.show import ShowEvents
+from view.delete import DeleteEvent
 
 
 class ViewApp(
     ShowEvents,
     AddEvent,
+    DeleteEvent,
 ):
     def run(self) -> None:
         # self.set_bg(f"img/LogoNovardisNew.png")
         if not "selected" in st.session_state:
-            st.session_state.selected = 1
+            st.session_state.selected = "1"
 
         if not "email" in st.session_state:
             st.session_state.email = "-"
@@ -32,19 +34,19 @@ class ViewApp(
                     "calendar-event",
                 ],
                 menu_icon="cast",
-                default_index=0,
+                default_index=2,
                 orientation="vertical",
                 styles={
                     "container": {"background-color": "#fafafa"},
                     "icon": {"color": "black", "font-size": "15px"},
-                    # "nav-link": {"font-size": "15px", "margin": "0px", "--hover-color": "#eee"},
                 },
             )
         if selected == "Show":
-            self.show_events()
+            self.main_show()
         elif selected == "Add":
-            self.add_event()
+            self.main_add()
         elif selected == "Delete":
+            self.main_delete()
             pass
         elif selected == "Change":
             pass

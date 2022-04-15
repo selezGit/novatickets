@@ -8,11 +8,11 @@ class EventService:
         self._repository = EventRepository()
         self._cache = None
 
-    def get_all(self, start: datetime, end: datetime) -> dict:
-        return self._repository.get_all_by_date(start, end)
+    def get_all(self, **event) -> dict:
+        return self._repository.get_all_by_date(**event)
 
-    def get(self, id: str):
-        pass
+    def get_by_email(self, **event):
+        return self._repository.get_all_by_creator(**event)
 
     def add(self, **event) -> bool:
         if not self._repository.is_overlaps_datetime(**event):
@@ -20,6 +20,10 @@ class EventService:
             self._repository.insert(**event)
             self._repository.session_commit()
             return True
+
+    def delete(self, uid: str):
+        self._repository.delete_by_id(uid=uid)
+        self._repository.session_commit()
 
     def change(self, event: dict):
         pass

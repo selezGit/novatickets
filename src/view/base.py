@@ -1,4 +1,3 @@
-import base64
 from datetime import datetime, time, timedelta
 from typing import Tuple
 
@@ -6,7 +5,6 @@ import streamlit as st
 from core.config import *
 from PIL import Image
 from services.event_service import EventService
-from streamlit_option_menu import option_menu
 
 
 class BaseView:
@@ -102,8 +100,11 @@ class BaseView:
     #     )
     #     st.markdown(page_bg_img, unsafe_allow_html=True)
 
-    def btn_callback(self, btn: int):
-        st.session_state.selected = btn
+    def to_readable_format(self, date: datetime) -> str:
+        return date.strftime(r"%d-%b-%Y %H:%M")
+
+    def btn_callback(self, btn: int) -> None:
+        st.session_state.selected = str(btn)
 
     def button_widget(self) -> None:
         colls = [i for i in st.columns([5, 5, 5])]
@@ -154,7 +155,8 @@ class BaseView:
         return Image.open(IMG_DIR + f"office-{room}.png")
 
     def change_room(self):
-        st.session_state.selected = 1
+        if ROOMS[st.session_state.room]["places"] < int(st.session_state.selected):
+            st.session_state.selected = "1"
 
     def side_bar(self):
         with st.sidebar:

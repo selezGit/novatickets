@@ -46,10 +46,10 @@ class BaseRepository:
         return self.session.query(self.model).filter_by(**filters).all()
 
     def _get_model_id_field(self):
-        id_field = getattr(self.model, "id", None)
+        id_field = getattr(self.model, "uid", None)
 
         if id_field is None:
-            raise ValueError("Use model with `id` field")
+            raise ValueError("Use model with `uid` field")
         return id_field
 
     def _get_all_by_query(self, query: Select):
