@@ -25,7 +25,7 @@ class Event(Base):
     room = Column(String(MAX_DB_STRING_LENGTH))
     place = Column(String(MAX_DB_STRING_LENGTH))
     is_cancelled = Column(Boolean, default=False)
-    if_verified = Column(Boolean, default=False)
+    is_verified = Column(Boolean, default=False)
 
     def __repr__(self):
-        return f"<Event for user: {self.creator}>"
+        return f"<Event for user: {self.creator} uid: {self.uid}>"

@@ -5,33 +5,35 @@ from view.base import BaseView
 
 
 class DeleteEvent(BaseView):
-    @st.cache
-    def format_events(self, event):
-        return f"from {self.to_readable_format(event.start_date)} to {self.to_readable_format(event.end_date)} Комната: {event.room} место: {event.place}"
-
-    def delete_form(self, events):
-        if events:
-            with st.form("Step 1"):
-                selected_events = st.multiselect(
-                    "Please select events",
-                    events,
-                    key="selected_events",
-                    format_func=lambda x: self.format_events(x),
-                )
-                if st.form_submit_button("Submit"):
-                    [self._event.delete(event.uid) for event in selected_events]
-                    st.success("На указанный email отправлено письмо для удаления события")
-
     def main_delete(self):
-        self.side_bar()
+        st.session_state.num = 1
+        while True:
+            placeholder = st.empty()
+            placeholder2 = st.empty()
 
-        email = st.text_input(
-            "Введите email",
-        )
+            with placeholder.container():
+                st.subheader("Выберите события для удаления")
+                events = self._event.get_by_email(creator=st.session_state.email)
+                if events:
+                    selected_events = st.multiselect(
+                        "Please select events for remove",
+                        events,
+                        key="selected_events",
+                        format_func=lambda x: self.format_events(x),
+                    )
+                    submit = st.button("Удалить выбранные события", key=st.session_state.num)
+                    if submit:
+                        [self._event.delete(event.uid) for event in selected_events]
+                        placeholder2.success(
+                            "На указанный email отправлено письмо для подтверждения отмены бронирования"
+                        )
+                        st.session_state.num += 1
+                        placeholder.empty()
+                    else:
+                        st.stop()
 
-        if email:
-            events = self._event.get_by_email(creator=email)
-            if events:
-                self.delete_form(events)
-            else:
-                st.warning("События не найдены, попробуйте ввести корректный email или добавить события на вкладке Add")
+                else:
+                    st.warning(
+                        "События не найдены, попробуйте ввести корректный email или добавить события на вкладке Add"
+                    )
+                    break

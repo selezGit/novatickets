@@ -35,8 +35,7 @@ class BaseRepository:
         return instance
 
     def update(self, instance, **data) -> Type[ModelType]:
-        for key, value in data.items():
-            setattr(instance, key, value)
+        self.session.query(self.model).filter(self.model.uid == instance.uid).update(data)
         return instance
 
     def get(self, **filters):

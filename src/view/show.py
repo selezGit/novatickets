@@ -9,8 +9,9 @@ class ShowEvents(BaseView):
     @st.cache
     def conversion_item(self, item: Event) -> str:
         return f"""
-        Начальная дата: {item.start_date} Конечная дата: {item.end_date}
-        Кабинет: {item.room} Место: {item.place} Забронирован: {item.creator}
+        Комната: {item.room} Место: {item.place} Забронировал: {item.creator}
+        {item.start_date.strftime("%d.%m.%Y %H:%M")} - Начальная дата и время
+        {item.end_date.strftime("%d.%m.%Y %H:%M")} - Конечная дата и время
          """
 
     def show_form(self):
@@ -25,13 +26,13 @@ class ShowEvents(BaseView):
             )
         ]
 
-        with st.expander("Status", expanded=True):
-            st.markdown(
-                f"""
-                ```python
-                {"".join(status) or f'Бронирований места №{st.session_state.selected} на выбранные даты нет'}
-                """
-            )
+        st.subheader("status")
+        st.markdown(
+            f"""
+            ```python
+            {''.join(status) or f'Бронирований места №{st.session_state.selected} на выбранные даты нет'}
+            """
+        )
 
     def main_show(self):
         self.side_bar()
