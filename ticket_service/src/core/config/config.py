@@ -41,7 +41,10 @@ COLORS = {
 
 WHITE_LIST = [".com", ".ru"]
 
-CACHE_URL = "http:/localhost:5000/confirm?key="
+CONSUMER_HOST = os.getenv("CONSUMER_HOST")
+CONSUMER_PORT = os.getenv("CONSUMER_PORT")
+
+CACHE_URL = f"http://{CONSUMER_HOST}:{CONSUMER_PORT}/confirm?key="
 
 OPERATIONS = {
     "change": "изменения",

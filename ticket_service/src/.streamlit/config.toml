@@ -1,0 +1,10 @@
+[theme]
+font="sans serif"
+
+[server]
+port = 8080
+enableCORS=false
+enableXsrfProtection=false
+
+[browser]
+gatherUsageStats = false
