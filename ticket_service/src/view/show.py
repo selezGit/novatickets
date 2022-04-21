@@ -1,5 +1,4 @@
 import streamlit as st
-from core.config import *
 from models import Event
 
 from view.base import BaseView

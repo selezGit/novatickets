@@ -1,5 +1,4 @@
 import streamlit as st
-from core.config import *
 
 from view.base import BaseView
 

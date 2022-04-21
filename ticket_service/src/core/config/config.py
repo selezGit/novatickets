@@ -100,6 +100,9 @@ TIME = [
     "23:30",
     "23:59",
 ]
+
+CONSUMER_HOST = os.getenv("CONSUMER_HOST")
+
 try:
     from .local import *
 except ImportError:

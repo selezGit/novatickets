@@ -4,7 +4,7 @@ from flask.views import MethodView
 from db.redis import redis_handler
 from repository.redis import RedisCache
 from services.event import EventService
-
+from core.config import CONSUMER_HOST
 app = Flask(__name__)
 
 
@@ -27,4 +27,4 @@ app.add_url_rule("/confirm", view_func=ConfirmView.as_view("confirm"))
 
 
 if __name__ == "__main__":
-    app.run(host="192.168.4.50", debug=True)
+    app.run(host=CONSUMER_HOST, debug=True)

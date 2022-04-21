@@ -1,8 +1,6 @@
 import streamlit as st
-from core.config import *
 
 from view.base import BaseView
-from models import Event
 
 
 class CreateEvent(BaseView):

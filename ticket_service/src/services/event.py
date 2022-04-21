@@ -1,7 +1,7 @@
 from typing import Any, List
 from uuid import UUID, uuid4
 
-from core.config import *
+from core.config import CACHE_URL, OPERATIONS
 from db.redis import redis_handler
 from models import Event
 from repository import EventRepository

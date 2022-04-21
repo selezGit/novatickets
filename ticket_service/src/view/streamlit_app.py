@@ -1,8 +1,7 @@
 import streamlit as st
-from core.config import *
 from streamlit_option_menu import option_menu
 
-from . import CreateEvent, ChangeEvent, DeleteEvent, ShowEvents
+from . import ChangeEvent, CreateEvent, DeleteEvent, ShowEvents
 
 
 class ViewApp(

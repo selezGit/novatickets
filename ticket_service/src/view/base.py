@@ -2,7 +2,7 @@ from datetime import datetime, time, timedelta
 from typing import Tuple
 
 import streamlit as st
-from core.config import *
+from core.config import TIME, ROOMS, COLORS, IMG_DIR, WHITE_LIST
 from PIL import Image
 from services.event import EventService
 

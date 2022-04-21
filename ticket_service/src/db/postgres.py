@@ -1,6 +1,4 @@
-from typing import Generator
-
-from core.config import *
+from core.config import DB
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
 from sqlalchemy.ext.declarative import declarative_base
