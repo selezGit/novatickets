@@ -1,10 +1,20 @@
-from typing import TypeVar, Type
+import abc
+from models import Event
+from typing import Type, TypeVar
 
+from core.config import CACHE_EXPIRE_IN_SECONDS
 from db.postgres import Base, get_db
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import Select
 
 ModelType = TypeVar("ModelType", bound=Base)
+
+
+class ExpirationCache(abc.ABC):
+    def __init__(self, cache_handler, expire=CACHE_EXPIRE_IN_SECONDS):
+        self.cache_handler = cache_handler
+        self.expire = expire
+        self.model = Event
 
 
 class BaseRepository:
@@ -35,7 +45,8 @@ class BaseRepository:
         return instance
 
     def update(self, instance, **data) -> Type[ModelType]:
-        self.session.query(self.model).filter(self.model.uid == instance.uid).update(data)
+        for key, value in data.items():
+            setattr(instance, key, value)
         return instance
 
     def get(self, **filters):

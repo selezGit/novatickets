@@ -1,13 +1,14 @@
 import uuid
 
 from db.postgres import Base
-from sqlalchemy import Boolean, Column, DateTime, String
+from sqlalchemy import Column, DateTime, String
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy_serializer import SerializerMixin
 
 MAX_DB_STRING_LENGTH = 255
 
 
-class Event(Base):
+class Event(Base, SerializerMixin):
     __tablename__ = "events"
     __table_args__ = {"extend_existing": True}
 
@@ -24,8 +25,6 @@ class Event(Base):
     creator = Column(String(MAX_DB_STRING_LENGTH))
     room = Column(String(MAX_DB_STRING_LENGTH))
     place = Column(String(MAX_DB_STRING_LENGTH))
-    is_cancelled = Column(Boolean, default=False)
-    is_verified = Column(Boolean, default=False)
 
     def __repr__(self):
         return f"<Event for user: {self.creator} uid: {self.uid}>"

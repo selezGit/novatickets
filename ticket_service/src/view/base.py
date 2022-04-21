@@ -4,11 +4,10 @@ from typing import Tuple
 import streamlit as st
 from core.config import *
 from PIL import Image
-from services.event_service import EventService
+from services.event import EventService
 
 
 class BaseView:
-
     _event = EventService()
 
     def combine_datetime(self) -> Tuple[datetime, datetime]:
@@ -42,7 +41,6 @@ class BaseView:
 
     def set_datetime(self):
         start, end = self.combine_datetime()
-
         if start >= end:
             st.session_state.end_date = (start + timedelta(minutes=30)).date()
             st.session_state.end_time = (start + timedelta(minutes=30)).strftime("%H:%M")
@@ -70,32 +68,41 @@ class BaseView:
             )
 
         with col2:
+
+            start_index = 18
+            end_index = start_index
+
+            if today.date() == st.session_state.end_date:
+                start_index = TIME.index(self.ceil_dt(today, timedelta(minutes=30)))
+                end_index = start_index
+                if today.time() > time(23, 0):
+                    start_index = 47
+                    end_index = 47
+
             st.selectbox(
                 "start time",
                 TIME,
-                index=18,
+                index=start_index,
                 key="start_time",
                 on_change=self.set_datetime,
                 disabled=st.session_state.all_day,
             )
 
-            index = 0
-            if st.session_state.start_date == st.session_state.end_date:
-                index = TIME.index(st.session_state.start_time)
-
             st.selectbox(
                 "end time",
-                TIME[index + 1 :],
+                TIME[end_index + 1 :],
                 key="end_time",
                 on_change=self.set_datetime,
                 disabled=st.session_state.all_day,
                 format_func=lambda x: self.format_time(x),
             )
 
-    def to_readable_format(self, date: datetime) -> str:
+    @staticmethod
+    def to_readable_format(date: datetime) -> str:
         return date.strftime(r"%d %b %Y %H:%M")
 
-    def btn_callback(self, btn: int) -> None:
+    @staticmethod
+    def btn_callback(btn: int) -> None:
         st.session_state.selected = str(btn)
 
     def get_buttons(self):
@@ -107,7 +114,7 @@ class BaseView:
         )
 
     def button_widget(self) -> None:
-        colls = [i for i in st.columns([5, 5, 5])]
+        colls = [i for i in st.columns([1, 1, 1])]
         style = ""
         places = ROOMS[st.session_state.room]["places"]
 
@@ -119,18 +126,18 @@ class BaseView:
                 for i in range((y * (places // 3)) + 1, ((places // 3) * (y + 1)) + 1):
                     st.button(f"Place {i}", key=f"button{i}", on_click=self.btn_callback, args=(i,))
                     if i in reserved_places:
-                        style += self.create_btn("red", x=x, y=y + 1)
+                        style += self.set_style_button("red", x=x, y=y + 1)
                     else:
-                        style += self.create_btn("green", x=x, y=y + 1)
+                        style += self.set_style_button("green", x=x, y=y + 1)
 
                     x += 1
                 if y == 2 and places % 3 != 0:
                     for i in range(((places // 3) * (y + 1)) + 1, places + 1):
                         st.button(f"Place {i}", key=f"button{i}", on_click=self.btn_callback, args=(i,))
                         if i in reserved_places:
-                            style += self.create_btn("red", x=x, y=y + 1)
+                            style += self.set_style_button("red", x=x, y=y + 1)
                         else:
-                            style += self.create_btn("green", x=x, y=y + 1)
+                            style += self.set_style_button("green", x=x, y=y + 1)
                         x += 1
 
         st.markdown(
@@ -140,10 +147,10 @@ class BaseView:
             unsafe_allow_html=True,
         )
 
-    def create_btn(self, state: str, x: int, y: int) -> str:
+    @staticmethod
+    def set_style_button(state: str, x: int, y: int) -> str:
         return f"""
-        
-        div:nth-child(5) > div:nth-child({y}) > div:nth-child(1) > div > div:nth-child({x}) > div > button {{
+            div:nth-child(6) > div:nth-child({y}) > div:nth-child(1) > div > div:nth-child({x}) > div > button {{
             border-color: {COLORS[state]};
             border-width: 2px;
             width:6em;
@@ -151,7 +158,7 @@ class BaseView:
             height:2em;
             color:#fffffff;
         }}
-        div:nth-child(5) > div:nth-child({y}) > div:nth-child(1) > div > div:nth-child({x}) > div > button:hover {{
+        div:nth-child(6) > div:nth-child({y}) > div:nth-child(1) > div > div:nth-child({x}) > div > button:hover {{
             background-color: #ff4c4c;
             border-width: 2px;
             width:6em;
@@ -175,12 +182,10 @@ class BaseView:
             self.button_widget()
 
     def input_email(self):
-        # TODO тут надо сделать проверку на наличие в списке разрешённых
         placeholder = st.empty()
 
         email = placeholder.text_input(
             "email",
-            value="selezard",
             placeholder="Введите ваш email",
             key="email",
             autocomplete="email",
@@ -188,8 +193,16 @@ class BaseView:
         if not email:
             st.stop()
 
-        if email:
+        if email and "@" in email and email.split("@")[1] in WHITE_LIST:
             placeholder.empty()
+            return
+        else:
+            st.warning("Введите пожалуйста корректный email или обратитесь в службу поддержки sa@novardis.com")
+            st.stop()
 
     def format_events(self, event):
         return f"{self.to_readable_format(event.start_date)} — {self.to_readable_format(event.end_date)} Комната: {event.room} место: {event.place}"
+
+    @staticmethod
+    def ceil_dt(dt: datetime, delta: timedelta) -> str:
+        return (dt + (datetime.min - dt) % delta).strftime("%H:%M")

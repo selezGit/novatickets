@@ -6,24 +6,30 @@ from view.base import BaseView
 
 class DeleteEvent(BaseView):
     def main_delete(self):
+        self.side_bar()
+
         st.session_state.num = 1
         while True:
             placeholder = st.empty()
             placeholder2 = st.empty()
 
             with placeholder.container():
-                st.subheader("Выберите события для удаления")
                 events = self._event.get_by_email(creator=st.session_state.email)
                 if events:
+                    st.subheader("Выберите события для удаления")
                     selected_events = st.multiselect(
                         "Please select events for remove",
                         events,
-                        key="selected_events",
+                        key=f"selected{st.session_state.num}",
                         format_func=lambda x: self.format_events(x),
                     )
                     submit = st.button("Удалить выбранные события", key=st.session_state.num)
                     if submit:
-                        [self._event.delete(event.uid) for event in selected_events]
+                        if not selected_events:
+                            st.stop()
+
+                        self._event.delete(st.session_state.email, selected_events)
+
                         placeholder2.success(
                             "На указанный email отправлено письмо для подтверждения отмены бронирования"
                         )

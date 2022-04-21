@@ -37,7 +37,7 @@ class ShowEvents(BaseView):
     def main_show(self):
         self.side_bar()
         self.show_form()
-        with st.expander(f"Room {st.session_state.room}", expanded=True):
+        with st.expander(f"Room {st.session_state.room}", expanded=False):
             st.image(
                 self.get_image(st.session_state.room),
             )

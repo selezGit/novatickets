@@ -1,4 +1,5 @@
 from operator import ge
+from typing import List
 from models.event import Event
 from sqlalchemy import and_
 
@@ -9,7 +10,6 @@ class EventRepository(BaseRepository):
     model = Event
 
     def get_all_by_date(self, **event):
-        # ограничить только одним раб. местом
         return self._get_all_by_query(
             self._occurrence_query(**event)
             .filter(
@@ -29,11 +29,10 @@ class EventRepository(BaseRepository):
     def is_overlaps_datetime(self, **event) -> bool:
         return self._get_one_by_query(self._overlaps_query(**event)) is not None
 
-    def is_overlaps_excluding_event(self, uid: str, **event):
-        return self._get_one_by_query(self._overlaps_query(**event).where(self.model.uid != uid)) is not None
+    def is_overlaps_excluding_event(self, **event) -> bool:
+        return self._get_one_by_query(self._overlaps_query(**event).filter(self.model.uid != event.get('uid'))) is not None
 
     def _overlaps_query(self, **event):
-        # TODO необходимо добавить ещё два ключа is_cancelled, is_verified
         return self.session.query(self.model).filter(
             and_(
                 self.model.start_date <= event.get("end_date"),
@@ -57,3 +56,6 @@ class EventRepository(BaseRepository):
             )
             .order_by(self.model.start_date)
         )
+
+    def delete_many_events(self, events: List[dict]) -> None:
+        [self.delete_by_id(event.get("uid")) for event in events]

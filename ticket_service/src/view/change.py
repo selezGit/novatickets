@@ -28,14 +28,15 @@ class ChangeEvent(BaseView):
             submit = st.form_submit_button("Изменить событие")
             if submit:
                 if self._event.change(
-                    selected_event,
+                    email=st.session_state.email,
+                    instance=selected_event,
                     start_date=start,
                     end_date=end,
                     creator=st.session_state.email,
                     room=st.session_state.room,
                     place=str(st.session_state.selected),
                 ):
-                    st.success("На указанный email отправлено письмо для подтверждения события")
+                    st.success("На указанный email отправлено письмо для подтверждения изменения бронирования")
                 else:
                     st.error(f"Рабочее место №{st.session_state.selected} на указанную дату уже занято")
 
