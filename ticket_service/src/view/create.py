@@ -1,15 +1,21 @@
 import streamlit as st
 
 from view.base import BaseView
+from core.config import ROOMS
 
 
 class CreateEvent(BaseView):
     def create_form(self):
-        with st.form("Create_form"):
-            start, end = self.combine_datetime()
+        self.date_widget()
+        start, end = self.combine_datetime()
+
+        col1, col2 = st.columns([1, 2])
+        with col1:
+            st.selectbox("Please select room", ROOMS, key="room", on_change=self.change_room)
+        with col2:
             st.markdown(
                 f"""
-                ##### **Данные бронирования**
+                ###### Данные бронирования
                 ```python
                 Комната: {st.session_state.room} Место: {st.session_state.selected}
                 {start.strftime("%d.%m.%Y %H:%M")} - Начальная дата и время
@@ -17,10 +23,14 @@ class CreateEvent(BaseView):
                 ```
             """
             )
+        self.button_widget()
 
-            submit = st.form_submit_button("Забронировать")
+        _, col2, _ = st.columns(3)
+        with col2:
+            submit = st.button("Забронировать")
 
-            if submit:
+        if submit:
+            with st.spinner("Please wait..."):
                 if self._event.create(
                     email=st.session_state.email,
                     start_date=start,
@@ -34,8 +44,6 @@ class CreateEvent(BaseView):
                     st.error("Рабочее место на указанную дату уже занято")
 
     def main_create(self):
-
-        self.side_bar()
         self.create_form()
 
         with st.expander(f"Room {st.session_state.room}", expanded=False):

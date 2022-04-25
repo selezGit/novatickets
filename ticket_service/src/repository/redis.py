@@ -1,3 +1,4 @@
+import json
 from typing import List, Optional, Tuple
 
 import orjson
@@ -27,7 +28,7 @@ class RedisCache(ExpirationCache):
         """
         self.cache_handler.set(
             key,
-            orjson.dumps([orjson.dumps(entity.to_dict()) for entity in entities_list]),
+            orjson.dumps([json.dumps(entity.to_dict()) for entity in entities_list]),
             ex=self.expire,
         )
 

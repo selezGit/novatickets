@@ -104,7 +104,11 @@ TIME = [
     "23:59",
 ]
 
-CONSUMER_HOST = os.getenv("CONSUMER_HOST")
+
+STREAMLIT_STYLES = """ <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    </style> """
 
 try:
     from .local import *

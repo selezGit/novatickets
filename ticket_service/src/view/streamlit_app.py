@@ -11,6 +11,7 @@ class ViewApp(
     ChangeEvent,
 ):
     def run(self) -> None:
+        self.hide_menu()
         self.input_email()
         if not "selected" in st.session_state:
             st.session_state.selected = "1"

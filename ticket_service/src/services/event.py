@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, Dict, List
 from uuid import UUID, uuid4
 
 from core.config import CACHE_URL, OPERATIONS
@@ -19,8 +19,16 @@ class EventService:
     def get_all(self, **event) -> dict:
         return self._repository.get_all_by_date(**event)
 
-    def get_all_buttons(self, **event):
-        return self._repository.get_all_by_room(**event)
+    def get_all_buttons(self, **event) -> Dict[int, List[Event]]:
+        cleared_dict = {}
+        {
+            cleared_dict.setdefault(
+                item.place,
+                [],
+            ).append(item)
+            for item in self._repository.get_all_by_room(**event)
+        }
+        return cleared_dict
 
     def get_by_email(self, **event):
         return self._repository.get_all_by_creator(**event)
@@ -40,7 +48,7 @@ class EventService:
 
     def change(self, email: str, instance: Event, **event) -> bool:
         operation = "change"
-        if not self._repository.is_overlaps_excluding_event(instance.uid, **event):
+        if not self._repository.is_overlaps_excluding_event(**event):
             instance = self._repository.update(instance, **event)
             key = self._put_in_cache(instance, operation)
             self._send(email, key, operation)

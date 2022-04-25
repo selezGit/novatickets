@@ -1,8 +1,8 @@
 from datetime import datetime, time, timedelta
-from typing import Tuple
+from typing import Dict, Tuple
 
 import streamlit as st
-from core.config import TIME, ROOMS, COLORS, IMG_DIR, WHITE_LIST
+from core.config import COLORS, IMG_DIR, ROOMS, STREAMLIT_STYLES, TIME, WHITE_LIST
 from PIL import Image
 from services.event import EventService
 
@@ -48,6 +48,9 @@ class BaseView:
     def date_widget(self) -> None:
         today = datetime.now()
 
+        if today.time() > time(23, 0):
+            today = today.date() + timedelta(days=1)
+
         st.checkbox("All day", key="all_day")
         col1, col2 = st.columns([2, 3])
         with col1:
@@ -69,17 +72,12 @@ class BaseView:
 
         with col2:
 
-            start_index = 18
-            end_index = start_index
+            start_index = 0
 
             if today.date() == st.session_state.end_date:
                 start_index = TIME.index(self.ceil_dt(today, timedelta(minutes=30)))
-                end_index = start_index
-                if today.time() > time(23, 0):
-                    start_index = 47
-                    end_index = 47
 
-            st.selectbox(
+            start_time = st.selectbox(
                 "start time",
                 TIME,
                 index=start_index,
@@ -88,9 +86,11 @@ class BaseView:
                 disabled=st.session_state.all_day,
             )
 
+            end_index = TIME.index(start_time) + 1
+
             st.selectbox(
                 "end time",
-                TIME[end_index + 1 :],
+                TIME[end_index:],
                 key="end_time",
                 on_change=self.set_datetime,
                 disabled=st.session_state.all_day,
@@ -105,20 +105,43 @@ class BaseView:
     def btn_callback(btn: int) -> None:
         st.session_state.selected = str(btn)
 
-    def get_buttons(self):
+    @staticmethod
+    def hide_menu():
+        st.markdown(
+            STREAMLIT_STYLES,
+            unsafe_allow_html=True,
+        )
+
+    def calculate_index(self, start, end) -> float:
+        """Function counts the number of time slots between two dates"""
+        return (end - start) / timedelta(minutes=30)
+
+    def get_buttons(self) -> Dict[int, str]:
         start, end = self.combine_datetime()
-        return self._event.get_all_buttons(
+
+        full_interval = self.calculate_index(start, end)
+
+        button_dict = {}
+
+        for place, events in self._event.get_all_buttons(
             start_date=start,
             end_date=end,
             room=st.session_state.room,
-        )
+        ).items():
+            interval = sum(self.calculate_index(event.start_date, event.end_date) for event in events)
+
+            if interval >= full_interval:
+                button_dict[int(place)] = "red"
+            else:
+                button_dict[int(place)] = "gold"
+
+        return button_dict
 
     def button_widget(self) -> None:
         colls = [i for i in st.columns([1, 1, 1])]
         style = ""
         places = ROOMS[st.session_state.room]["places"]
-
-        reserved_places = [int(event.place) for event in self.get_buttons()]
+        reserved_places = self.get_buttons()
 
         for y, col in enumerate(colls):
             with col:
@@ -126,7 +149,7 @@ class BaseView:
                 for i in range((y * (places // 3)) + 1, ((places // 3) * (y + 1)) + 1):
                     st.button(f"Place {i}", key=f"button{i}", on_click=self.btn_callback, args=(i,))
                     if i in reserved_places:
-                        style += self.set_style_button("red", x=x, y=y + 1)
+                        style += self.set_style_button(reserved_places[i], x=x, y=y + 1)
                     else:
                         style += self.set_style_button("green", x=x, y=y + 1)
 
@@ -135,7 +158,7 @@ class BaseView:
                     for i in range(((places // 3) * (y + 1)) + 1, places + 1):
                         st.button(f"Place {i}", key=f"button{i}", on_click=self.btn_callback, args=(i,))
                         if i in reserved_places:
-                            style += self.set_style_button("red", x=x, y=y + 1)
+                            style += self.set_style_button(reserved_places[i], x=x, y=y + 1)
                         else:
                             style += self.set_style_button("green", x=x, y=y + 1)
                         x += 1
@@ -157,6 +180,8 @@ class BaseView:
             border-radius: 20px;
             height:2em;
             color:#fffffff;
+            padding: -15px;
+            margin-bottom: -15px;
         }}
         div:nth-child(6) > div:nth-child({y}) > div:nth-child(1) > div > div:nth-child({x}) > div > button:hover {{
             background-color: #ff4c4c;
@@ -165,6 +190,8 @@ class BaseView:
             border-radius: 20px;
             height:2em;
             color:#ffffff;
+            padding: -15px;
+            margin-bottom: -15px;
         }}"""
 
     @st.cache(allow_output_mutation=True)
@@ -177,9 +204,12 @@ class BaseView:
 
     def side_bar(self):
         with st.sidebar:
-            self.date_widget()
-            st.selectbox("Please select room", ROOMS, key="room", on_change=self.change_room)
-            self.button_widget()
+            self.bar()
+
+    def bar(self):
+        self.date_widget()
+        st.selectbox("Please select room", ROOMS, key="room", on_change=self.change_room)
+        self.button_widget()
 
     def input_email(self):
         placeholder = st.empty()
@@ -187,7 +217,6 @@ class BaseView:
         email = placeholder.text_input(
             "email",
             placeholder="Введите ваш email",
-            key="email",
             autocomplete="email",
         )
         if not email:
@@ -195,6 +224,7 @@ class BaseView:
 
         if email and "@" in email and email.split("@")[1] in WHITE_LIST:
             placeholder.empty()
+            st.session_state.email = email.strip()
             return
         else:
             st.warning("Введите пожалуйста корректный email или обратитесь в службу поддержки sa@novardis.com")

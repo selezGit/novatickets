@@ -29,9 +29,6 @@ class EventRepository(BaseRepository):
     def is_overlaps_datetime(self, **event) -> bool:
         return self._get_one_by_query(self._overlaps_query(**event)) is not None
 
-    def is_overlaps_excluding_event(self, **event) -> bool:
-        return self._get_one_by_query(self._overlaps_query(**event).filter(self.model.uid != event.get('uid'))) is not None
-
     def _overlaps_query(self, **event):
         return self.session.query(self.model).filter(
             and_(
@@ -40,6 +37,11 @@ class EventRepository(BaseRepository):
                 self.model.room == event.get("room"),
                 self.model.place == event.get("place"),
             )
+        )
+
+    def is_overlaps_excluding_event(self, **event) -> bool:
+        return (
+            self._get_one_by_query(self._overlaps_query(**event).filter(self.model.uid != event.get("uid"))) is not None
         )
 
     def _occurrence_query(self, **event):
