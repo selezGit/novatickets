@@ -2,7 +2,7 @@ import os
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) + os.sep
-IMG_DIR = BASE_DIR + "src" + os.sep + "img" + os.sep
+IMG_DIR = BASE_DIR + "src" + os.sep + "images" + os.sep
 TEMPLATE_DIR = BASE_DIR + "src" + os.sep + "templates" + os.sep
 
 # email conf

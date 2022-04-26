@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
 
 from core.config import CACHE_URL, OPERATIONS
@@ -38,20 +38,20 @@ class EventService:
         if not self._repository.is_overlaps_datetime(**event):
             instance = self._repository.model(**event)
             key = self._put_in_cache(instance, operation)
-            self._send(email, key, operation)
+            self._send(email, key, operation, [event])
             return True
 
     def delete(self, email: str, events: List[Event]):
         operation = "delete"
         key = self._put_in_cache(events, operation)
-        self._send(email, key, operation)
+        self._send(email, key, operation, events)
 
     def change(self, email: str, instance: Event, **event) -> bool:
         operation = "change"
         if not self._repository.is_overlaps_excluding_event(**event):
             instance = self._repository.update(instance, **event)
             key = self._put_in_cache(instance, operation)
-            self._send(email, key, operation)
+            self._send(email, key, operation, [instance])
             return True
 
     def do_task(self, operation, data):
@@ -90,9 +90,10 @@ class EventService:
             self._cache.put(f"{key}::{operation}", instance)
         return key
 
-    def _send(self, email: str, key: UUID, operation: str) -> None:
+    def _send(self, email: str, key: UUID, operation: str, data: List[Dict[str, str]]) -> None:
         self._mail.send_email(
             email,
             CACHE_URL + str(key),
             OPERATIONS[operation],
+            data,
         )

@@ -1,5 +1,6 @@
 import smtplib
 from email.message import EmailMessage
+from typing import Any
 
 from core.config import TEMPLATE_DIR, SENDER_MAIL, SENDER_PASSWORD
 from jinja2 import Environment, FileSystemLoader
@@ -9,9 +10,9 @@ class MailService:
     def __init__(self):
 
         self.env = Environment(loader=FileSystemLoader(TEMPLATE_DIR))
-        self.template = self.env.get_template("template.html")
+        self.template = self.env.get_template("email.html")
 
-    def send_email(self, email: str, link: str, operation: str) -> None:
+    def send_email(self, email: str, link: str, operation: str, data: Any) -> None:
 
         self.message = EmailMessage()
         self.message["To"] = email
@@ -21,6 +22,7 @@ class MailService:
             **{
                 "link": link,
                 "operation": operation,
+                "data": data,
             }
         )
 

@@ -1,5 +1,5 @@
 from datetime import datetime, time, timedelta
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 import streamlit as st
 from core.config import COLORS, IMG_DIR, ROOMS, STREAMLIT_STYLES, TIME, WHITE_LIST
@@ -45,7 +45,10 @@ class BaseView:
             st.session_state.end_date = (start + timedelta(minutes=30)).date()
             st.session_state.end_time = (start + timedelta(minutes=30)).strftime("%H:%M")
 
-    def date_widget(self) -> None:
+    def date_widget(
+        self,
+        max_end_date: Optional[datetime] = None,
+    ) -> None:
         today = datetime.now()
 
         if today.time() > time(23, 0):
@@ -61,9 +64,11 @@ class BaseView:
                 on_change=self.set_datetime,
                 key="start_date",
             )
+
             st.date_input(
                 "end date",
                 min_value=st.session_state.start_date,
+                max_value=max_end_date,
                 value=st.session_state.start_date,
                 on_change=self.set_datetime,
                 key="end_date",
@@ -130,10 +135,10 @@ class BaseView:
         ).items():
             interval = sum(self.calculate_index(event.start_date, event.end_date) for event in events)
 
-            if interval >= full_interval:
-                button_dict[int(place)] = "red"
-            else:
+            if interval < full_interval and not st.session_state.all_day:
                 button_dict[int(place)] = "gold"
+            else:
+                button_dict[int(place)] = "red"
 
         return button_dict
 
@@ -193,10 +198,6 @@ class BaseView:
             padding: -15px;
             margin-bottom: -15px;
         }}"""
-
-    @st.cache(allow_output_mutation=True)
-    def get_image(self, room: str) -> Image:
-        return Image.open(IMG_DIR + f"office-{room}.png")
 
     def change_room(self):
         if ROOMS[st.session_state.room]["places"] < int(st.session_state.selected):

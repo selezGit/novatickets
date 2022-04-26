@@ -14,4 +14,4 @@ serverAddress = "10.208.6.150"
 # Flag to hide most of the UI elements found at the top of a Streamlit app.
 # NOTE: This does *not* hide the hamburger menu in the top-right of an app.
 # Default: false
-hideTopBar = false
+hideTopBar = true

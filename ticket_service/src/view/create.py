@@ -1,12 +1,14 @@
+from datetime import datetime, timedelta
+
 import streamlit as st
+from core.config import ROOMS
 
 from view.base import BaseView
-from core.config import ROOMS
 
 
 class CreateEvent(BaseView):
-    def create_form(self):
-        self.date_widget()
+    def main_create(self):
+        self.date_widget(max_end_date=datetime.now() + timedelta(days=3))
         start, end = self.combine_datetime()
 
         col1, col2 = st.columns([1, 2])
@@ -42,11 +44,3 @@ class CreateEvent(BaseView):
                     st.success("На указанный email отправлено письмо для подтверждения бронирования")
                 else:
                     st.error("Рабочее место на указанную дату уже занято")
-
-    def main_create(self):
-        self.create_form()
-
-        with st.expander(f"Room {st.session_state.room}", expanded=False):
-            st.image(
-                self.get_image(st.session_state.room),
-            )

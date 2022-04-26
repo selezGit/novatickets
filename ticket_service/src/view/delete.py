@@ -24,14 +24,14 @@ class DeleteEvent(BaseView):
                     if submit:
                         if not selected_events:
                             st.stop()
-                        with st.spinner("Please wait..."):
-                            self._event.delete(st.session_state.email, selected_events)
+                        
+                        self._event.delete(st.session_state.email, selected_events)
 
-                            placeholder2.success(
-                                "На указанный email отправлено письмо для подтверждения отмены бронирования"
-                            )
-                            st.session_state.num += 1
-                            placeholder.empty()
+                        placeholder2.success(
+                            "На указанный email отправлено письмо для подтверждения отмены бронирования"
+                        )
+                        st.session_state.num += 1
+                        placeholder.empty()
                     else:
                         st.stop()
 

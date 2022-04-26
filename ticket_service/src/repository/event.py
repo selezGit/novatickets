@@ -1,3 +1,4 @@
+from datetime import datetime
 from operator import ge
 from typing import List
 from models.event import Event
@@ -55,6 +56,7 @@ class EventRepository(BaseRepository):
             self.session.query(self.model)
             .filter(
                 self.model.creator == event.get("creator"),
+                self.model.end_date > datetime.now(),
             )
             .order_by(self.model.start_date)
         )
