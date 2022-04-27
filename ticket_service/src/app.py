@@ -1,11 +1,10 @@
-from flask import Flask, request, render_template
+from flask import Flask, render_template, request
 from flask.views import MethodView
 
+from core.config import CONSUMER_HOST, MSG_TEMPLATE
 from db.redis import redis_handler
 from repository.redis import RedisCache
 from services.event import EventService
-from core.config import CONSUMER_HOST, MSG_TEMPLATE
-
 
 app = Flask(__name__)
 

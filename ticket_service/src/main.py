@@ -1,6 +1,7 @@
 import subprocess
+
+from core.config import CONSUMER_PORT
 from db.postgres import init_db
-from core.config import CONSUMER_HOST, CONSUMER_PORT
 
 if __name__ == "__main__":
     init_db()

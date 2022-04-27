@@ -1,5 +1,6 @@
-import redis
 from core.config import REDIS_HOST, REDIS_PORT
+
+import redis
 
 redis_handler = redis.StrictRedis(
     host=REDIS_HOST,

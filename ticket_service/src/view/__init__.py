@@ -1,4 +1,6 @@
-from .create import CreateEvent  # noqa
-from .change import ChangeEvent  # noqa
-from .delete import DeleteEvent  # noqa
-from .show import ShowEvents  # noqa
+from .create import CreateView  # noqa
+from .change import ChangeView  # noqa
+from .delete import DeleteView  # noqa
+from .show import ShowView  # noqa
+from .manager import ManagerView  # noqa
+from .faq import FAQView  # noqa

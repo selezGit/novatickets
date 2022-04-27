@@ -6,7 +6,7 @@ from core.config import ROOMS
 from view.base import BaseView
 
 
-class CreateEvent(BaseView):
+class CreateView(BaseView):
     def main_create(self):
         self.date_widget(max_end_date=datetime.now() + timedelta(days=3))
         start, end = self.combine_datetime()

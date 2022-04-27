@@ -1,9 +1,9 @@
 import abc
-from models import Event
 from typing import Type, TypeVar
 
 from core.config import CACHE_EXPIRE_IN_SECONDS
 from db.postgres import Base, get_db
+from models import Event
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import Select
 

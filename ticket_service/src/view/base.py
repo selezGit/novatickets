@@ -2,8 +2,8 @@ from datetime import datetime, time, timedelta
 from typing import Dict, Optional, Tuple
 
 import streamlit as st
-from core.config import COLORS, IMG_DIR, ROOMS, STREAMLIT_STYLES, TIME, WHITE_LIST
-from PIL import Image
+from core.config import ROOMS, STREAMLIT_STYLES, TIME, WHITE_LIST
+from core.utils import calculate_index, ceil_dt, set_style_button
 from services.event import EventService
 
 
@@ -80,7 +80,7 @@ class BaseView:
             start_index = 0
 
             if today.date() == st.session_state.end_date:
-                start_index = TIME.index(self.ceil_dt(today, timedelta(minutes=30)))
+                start_index = TIME.index(ceil_dt(today, timedelta(minutes=30)))
 
             start_time = st.selectbox(
                 "start time",
@@ -103,10 +103,6 @@ class BaseView:
             )
 
     @staticmethod
-    def to_readable_format(date: datetime) -> str:
-        return date.strftime(r"%d %b %Y %H:%M")
-
-    @staticmethod
     def btn_callback(btn: int) -> None:
         st.session_state.selected = str(btn)
 
@@ -117,14 +113,10 @@ class BaseView:
             unsafe_allow_html=True,
         )
 
-    def calculate_index(self, start, end) -> float:
-        """Function counts the number of time slots between two dates"""
-        return (end - start) / timedelta(minutes=30)
-
     def get_buttons(self) -> Dict[int, str]:
         start, end = self.combine_datetime()
 
-        full_interval = self.calculate_index(start, end)
+        full_interval = calculate_index(start, end)
 
         button_dict = {}
 
@@ -133,7 +125,7 @@ class BaseView:
             end_date=end,
             room=st.session_state.room,
         ).items():
-            interval = sum(self.calculate_index(event.start_date, event.end_date) for event in events)
+            interval = sum(calculate_index(event.start_date, event.end_date) for event in events)
 
             if interval < full_interval and not st.session_state.all_day:
                 button_dict[int(place)] = "gold"
@@ -154,18 +146,18 @@ class BaseView:
                 for i in range((y * (places // 3)) + 1, ((places // 3) * (y + 1)) + 1):
                     st.button(f"Place {i}", key=f"button{i}", on_click=self.btn_callback, args=(i,))
                     if i in reserved_places:
-                        style += self.set_style_button(reserved_places[i], x=x, y=y + 1)
+                        style += set_style_button(reserved_places[i], x=x, y=y + 1)
                     else:
-                        style += self.set_style_button("green", x=x, y=y + 1)
+                        style += set_style_button("green", x=x, y=y + 1)
 
                     x += 1
                 if y == 2 and places % 3 != 0:
                     for i in range(((places // 3) * (y + 1)) + 1, places + 1):
                         st.button(f"Place {i}", key=f"button{i}", on_click=self.btn_callback, args=(i,))
                         if i in reserved_places:
-                            style += self.set_style_button(reserved_places[i], x=x, y=y + 1)
+                            style += set_style_button(reserved_places[i], x=x, y=y + 1)
                         else:
-                            style += self.set_style_button("green", x=x, y=y + 1)
+                            style += set_style_button("green", x=x, y=y + 1)
                         x += 1
 
         st.markdown(
@@ -175,42 +167,15 @@ class BaseView:
             unsafe_allow_html=True,
         )
 
-    @staticmethod
-    def set_style_button(state: str, x: int, y: int) -> str:
-        return f"""
-            div:nth-child(6) > div:nth-child({y}) > div:nth-child(1) > div > div:nth-child({x}) > div > button {{
-            border-color: {COLORS[state]};
-            border-width: 2px;
-            width:6em;
-            border-radius: 20px;
-            height:2em;
-            color:#fffffff;
-            padding: -15px;
-            margin-bottom: -15px;
-        }}
-        div:nth-child(6) > div:nth-child({y}) > div:nth-child(1) > div > div:nth-child({x}) > div > button:hover {{
-            background-color: #ff4c4c;
-            border-width: 2px;
-            width:6em;
-            border-radius: 20px;
-            height:2em;
-            color:#ffffff;
-            padding: -15px;
-            margin-bottom: -15px;
-        }}"""
-
     def change_room(self):
         if ROOMS[st.session_state.room]["places"] < int(st.session_state.selected):
             st.session_state.selected = "1"
 
     def side_bar(self):
         with st.sidebar:
-            self.bar()
-
-    def bar(self):
-        self.date_widget()
-        st.selectbox("Please select room", ROOMS, key="room", on_change=self.change_room)
-        self.button_widget()
+            self.date_widget()
+            st.selectbox("Please select room", ROOMS, key="room", on_change=self.change_room)
+            self.button_widget()
 
     def input_email(self):
         placeholder = st.empty()
@@ -230,10 +195,3 @@ class BaseView:
         else:
             st.warning("Введите пожалуйста корректный email или обратитесь в службу поддержки sa@novardis.com")
             st.stop()
-
-    def format_events(self, event):
-        return f"{self.to_readable_format(event.start_date)} — {self.to_readable_format(event.end_date)} Комната: {event.room} место: {event.place}"
-
-    @staticmethod
-    def ceil_dt(dt: datetime, delta: timedelta) -> str:
-        return (dt + (datetime.min - dt) % delta).strftime("%H:%M")

@@ -1,6 +1,6 @@
 from datetime import datetime
-from operator import ge
 from typing import List
+
 from models.event import Event
 from sqlalchemy import and_
 

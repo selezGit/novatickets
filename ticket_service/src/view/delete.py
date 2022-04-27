@@ -1,9 +1,10 @@
 import streamlit as st
+from core.utils import format_events
 
 from view.base import BaseView
 
 
-class DeleteEvent(BaseView):
+class DeleteView(BaseView):
     def main_delete(self):
         st.session_state.num = 1
         while True:
@@ -18,13 +19,13 @@ class DeleteEvent(BaseView):
                         "Please select events for remove",
                         events,
                         key=f"selected{st.session_state.num}",
-                        format_func=lambda x: self.format_events(x),
+                        format_func=lambda x: format_events(x),
                     )
                     submit = st.button("Удалить выбранные события", key=st.session_state.num)
                     if submit:
                         if not selected_events:
                             st.stop()
-                        
+
                         self._event.delete(st.session_state.email, selected_events)
 
                         placeholder2.success(

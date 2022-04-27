@@ -7,7 +7,7 @@ Novatickets is a service for booking workplaces in the office.
 3. **Postgres** — DB 
 4. **Sreamlit** - Web view
 5. **Flask** - Request handler
-
+6. **Nginx** - web serving 
 
 
 # Installation

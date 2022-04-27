@@ -1,9 +1,10 @@
 import streamlit as st
+from core.utils import format_events, to_readable_format
 
 from view.base import BaseView
 
 
-class ChangeEvent(BaseView):
+class ChangeView(BaseView):
     def change_form(self, events):
         start, end = self.combine_datetime()
         st.markdown(
@@ -11,8 +12,8 @@ class ChangeEvent(BaseView):
             ##### **Новая дата**
             ```python
             Комната: {st.session_state.room} Место: {st.session_state.selected}
-            {start.strftime("%d.%m.%Y %H:%M")} - Начальная дата и время
-            {end.strftime("%d.%m.%Y %H:%M")} - Конечная дата и время
+            {to_readable_format(start)} - Начальная дата и время
+            {to_readable_format(end)} - Конечная дата и время
             ```
             ##### Выберите событие для изменения
         """
@@ -22,7 +23,7 @@ class ChangeEvent(BaseView):
             selected_event = st.selectbox(
                 "Please select events for change",
                 events,
-                format_func=lambda x: self.format_events(x),
+                format_func=lambda x: format_events(x),
             )
             submit = st.form_submit_button("Изменить событие")
             if submit:

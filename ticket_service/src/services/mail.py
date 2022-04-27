@@ -2,7 +2,7 @@ import smtplib
 from email.message import EmailMessage
 from typing import Any
 
-from core.config import TEMPLATE_DIR, SENDER_MAIL, SENDER_PASSWORD
+from core.config import SENDER_MAIL, SENDER_PASSWORD, TEMPLATE_DIR
 from jinja2 import Environment, FileSystemLoader
 
 

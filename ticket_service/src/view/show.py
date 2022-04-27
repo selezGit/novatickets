@@ -1,16 +1,17 @@
 import streamlit as st
+from core.utils import to_readable_format
 from models import Event
 
 from view.base import BaseView
 
 
-class ShowEvents(BaseView):
+class ShowView(BaseView):
     @st.cache
     def conversion_item(self, item: Event) -> str:
         return f"""
         Комната: {item.room} Место: {item.place} Забронировал: {item.creator}
-        {item.start_date.strftime("%d.%m.%Y %H:%M")} - Начальная дата и время
-        {item.end_date.strftime("%d.%m.%Y %H:%M")} - Конечная дата и время
+        {to_readable_format(item.start_date)} - Начальная дата и время
+        {to_readable_format(item.end_date)} - Конечная дата и время
          """
 
     def show_form(self):
