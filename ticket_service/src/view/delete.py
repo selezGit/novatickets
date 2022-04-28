@@ -14,9 +14,8 @@ class DeleteView(BaseView):
             with placeholder.container():
                 events = self._event.get_by_email(creator=st.session_state.email)
                 if events:
-                    st.subheader("Выберите события для удаления")
                     selected_events = st.multiselect(
-                        "Please select events for remove",
+                        "Выберите события для отмены",
                         events,
                         key=f"selected{st.session_state.num}",
                         format_func=lambda x: format_events(x),

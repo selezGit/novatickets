@@ -1,6 +1,5 @@
 import os
 
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) + os.sep
 TEMPLATE_DIR = BASE_DIR + "src" + os.sep + "templates" + os.sep
 
@@ -39,6 +38,9 @@ COLORS = {
 }
 
 WHITE_LIST = [".com", ".ru"]
+MANAGERS = []
+MANAGER_PASSWORD = os.getenv("MANAGER_PASSWORD")
+
 
 CONSUMER_HOST = os.getenv("CONSUMER_HOST")
 CONSUMER_PORT = os.getenv("CONSUMER_PORT")
@@ -49,6 +51,12 @@ OPERATIONS = {
     "change": "изменения",
     "create": "подтверждения",
     "delete": "отмены",
+}
+
+MSG_TEMPLATE = {
+    "create": "Бронирование успешно подтверждено.",
+    "change": "Бронирование успешно изменено.",
+    "delete": "Отмена бронирования успешно произведена.",
 }
 
 TIME = [

@@ -1,16 +1,16 @@
 from datetime import datetime, time, timedelta
-from typing import Dict, Optional, Tuple
+from typing import Dict, Tuple
 
 import streamlit as st
 from core.config import ROOMS, STREAMLIT_STYLES, TIME, WHITE_LIST
-from core.utils import calculate_index, ceil_dt, set_style_button
+from core.utils import calculate_index, ceil_dt, set_style_button, to_readable_format
 from services.event import EventService
 
 
 class BaseView:
     _event = EventService()
 
-    def combine_datetime(self) -> Tuple[datetime, datetime]:
+    def _get_start_end_date(self) -> Tuple[datetime, datetime]:
         sdt = st.session_state.start_date
         edt = st.session_state.end_date
 
@@ -25,7 +25,7 @@ class BaseView:
             end = datetime.combine(sdt + timedelta(days=1), time(0, 0))
         return start, end
 
-    def format_time(self, end_time):
+    def format_time(self, end_time) -> str:
         if st.session_state.start_date != st.session_state.end_date or st.session_state.all_day:
             return end_time
 
@@ -40,25 +40,24 @@ class BaseView:
         return f"{end_time} ({duration} hours)"
 
     def set_datetime(self):
-        start, end = self.combine_datetime()
+        start, end = self._get_start_end_date()
         if start >= end:
             st.session_state.end_date = (start + timedelta(minutes=30)).date()
             st.session_state.end_time = (start + timedelta(minutes=30)).strftime("%H:%M")
 
     def date_widget(
         self,
-        max_end_date: Optional[datetime] = None,
     ) -> None:
         today = datetime.now()
 
         if today.time() > time(23, 0):
             today = today.date() + timedelta(days=1)
 
-        st.checkbox("All day", key="all_day")
+        st.checkbox("Весь день", key="all_day")
         col1, col2 = st.columns([2, 3])
         with col1:
             st.date_input(
-                "start date",
+                "Начальная дата",
                 min_value=today,
                 value=today,
                 on_change=self.set_datetime,
@@ -66,9 +65,9 @@ class BaseView:
             )
 
             st.date_input(
-                "end date",
+                "Конечная дата",
                 min_value=st.session_state.start_date,
-                max_value=max_end_date,
+                max_value=st.session_state.start_date + timedelta(days=3),
                 value=st.session_state.start_date,
                 on_change=self.set_datetime,
                 key="end_date",
@@ -83,7 +82,7 @@ class BaseView:
                 start_index = TIME.index(ceil_dt(today, timedelta(minutes=30)))
 
             start_time = st.selectbox(
-                "start time",
+                "Начальное время",
                 TIME,
                 index=start_index,
                 key="start_time",
@@ -94,7 +93,7 @@ class BaseView:
             end_index = TIME.index(start_time) + 1
 
             st.selectbox(
-                "end time",
+                "Конечное время",
                 TIME[end_index:],
                 key="end_time",
                 on_change=self.set_datetime,
@@ -103,8 +102,8 @@ class BaseView:
             )
 
     @staticmethod
-    def btn_callback(btn: int) -> None:
-        st.session_state.selected = str(btn)
+    def btn_callback(btn: int):
+        st.session_state.place = str(btn)
 
     @staticmethod
     def hide_menu():
@@ -113,8 +112,8 @@ class BaseView:
             unsafe_allow_html=True,
         )
 
-    def get_buttons(self) -> Dict[int, str]:
-        start, end = self.combine_datetime()
+    def _get_reserved_places(self) -> Dict[int, str]:
+        start, end = self._get_start_end_date()
 
         full_interval = calculate_index(start, end)
 
@@ -134,30 +133,46 @@ class BaseView:
 
         return button_dict
 
-    def button_widget(self) -> None:
-        colls = [i for i in st.columns([1, 1, 1])]
+    def button_widget(self):
+        colls = [i for i in st.columns([1, 1, 1, 1])]
         style = ""
-        places = ROOMS[st.session_state.room]["places"]
-        reserved_places = self.get_buttons()
+        places_count = ROOMS[st.session_state.room]["places"]
+        reserved_places = self._get_reserved_places()
 
         for y, col in enumerate(colls):
             with col:
                 x = 1
-                for i in range((y * (places // 3)) + 1, ((places // 3) * (y + 1)) + 1):
+                for i in range((y * (places_count // len(colls))) + 1, ((places_count // len(colls)) * (y + 1)) + 1):
                     st.button(f"Place {i}", key=f"button{i}", on_click=self.btn_callback, args=(i,))
                     if i in reserved_places:
-                        style += set_style_button(reserved_places[i], x=x, y=y + 1)
+                        style += set_style_button(
+                            reserved_places[i],
+                            x=x,
+                            y=y + 1,
+                        )
                     else:
-                        style += set_style_button("green", x=x, y=y + 1)
+                        style += set_style_button(
+                            "green",
+                            x=x,
+                            y=y + 1,
+                        )
 
                     x += 1
-                if y == 2 and places % 3 != 0:
-                    for i in range(((places // 3) * (y + 1)) + 1, places + 1):
+                if y == (len(colls) - 1) and places_count % len(colls) != 0:
+                    for i in range(((places_count // len(colls)) * (y + 1)) + 1, places_count + 1):
                         st.button(f"Place {i}", key=f"button{i}", on_click=self.btn_callback, args=(i,))
                         if i in reserved_places:
-                            style += set_style_button(reserved_places[i], x=x, y=y + 1)
+                            style += set_style_button(
+                                reserved_places[i],
+                                x=x,
+                                y=y + 1,
+                            )
                         else:
-                            style += set_style_button("green", x=x, y=y + 1)
+                            style += set_style_button(
+                                "green",
+                                x=x,
+                                y=y + 1,
+                            )
                         x += 1
 
         st.markdown(
@@ -167,15 +182,9 @@ class BaseView:
             unsafe_allow_html=True,
         )
 
-    def change_room(self):
-        if ROOMS[st.session_state.room]["places"] < int(st.session_state.selected):
-            st.session_state.selected = "1"
-
-    def side_bar(self):
-        with st.sidebar:
-            self.date_widget()
-            st.selectbox("Please select room", ROOMS, key="room", on_change=self.change_room)
-            self.button_widget()
+    def set_room(self):
+        if ROOMS[st.session_state.room]["places"] < int(st.session_state.place):
+            st.session_state.place = "1"
 
     def input_email(self):
         placeholder = st.empty()
@@ -195,3 +204,34 @@ class BaseView:
         else:
             st.warning("Введите пожалуйста корректный email или обратитесь в службу поддержки sa@novardis.com")
             st.stop()
+
+    def booking(self, start, end):
+        st.caption("Бронирование:")
+
+        st.markdown(
+            f"""
+            ```python
+            Комната: {st.session_state.room} Место: {st.session_state.place}
+            Начало: {to_readable_format(start)}
+            Конец: {to_readable_format(end)}
+            ```
+        """
+        )
+
+    def status(self, start, end):
+        status = [
+            self.conversion_item(item)
+            for item in self._event.get_all(
+                room=st.session_state.room,
+                place=st.session_state.place,
+                start_date=start,
+                end_date=end,
+            )
+        ]
+        st.caption("Текущий статус:")
+        st.markdown(
+            f"""
+            ```python
+            {''.join(status) or f'Бронирований места №{st.session_state.place} на выбранные даты нет'}
+            """
+        )

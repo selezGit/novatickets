@@ -2,14 +2,19 @@ import streamlit as st
 from core.config import MANAGERS
 from streamlit_option_menu import option_menu
 
-from . import ChangeView, CreateView, DeleteView, FAQView, ManagerView, ShowView
+from . import (
+    ChangeView,
+    CreateView,
+    DeleteView,
+    FAQView,
+    ManagerView,
+)
 
 
 class ViewApp(
     ChangeView,
     CreateView,
     DeleteView,
-    ShowView,
     ManagerView,
     FAQView,
 ):
@@ -17,12 +22,11 @@ class ViewApp(
         self.hide_menu()
         self.input_email()
 
-        default_menu = ["Show", "Create", "Delete", "Change", "FAQ"]
+        default_menu = ["Создать", "Изменить", "Удалить", "FAQ"]
         icons = [
-            "calendar3",
             "calendar-plus",
-            "calendar-x",
             "calendar-event",
+            "calendar-x",
             "info-square",
         ]
 
@@ -30,14 +34,14 @@ class ViewApp(
             default_menu.append("Manager")
             icons.append("lock")
 
-        if not "selected" in st.session_state:
-            st.session_state.selected = "1"
+        if not "place" in st.session_state:
+            st.session_state.place = "1"
 
         if not "all_day" in st.session_state:
             st.session_state.all_day = False
 
         with st.sidebar:
-            st.markdown(f"### User: {st.session_state.email}")
+            st.markdown(f"### Пользователь: {st.session_state.email}")
             selected = option_menu(
                 None,
                 default_menu,
@@ -46,13 +50,11 @@ class ViewApp(
                 default_index=0,
                 orientation="vertical",
             )
-        if selected == "Show":
-            self.main_show()
-        elif selected == "Create":
+        if selected == "Создать":
             self.main_create()
-        elif selected == "Change":
+        elif selected == "Изменить":
             self.main_change()
-        elif selected == "Delete":
+        elif selected == "Удалить":
             self.main_delete()
         elif selected == "Manager":
             self.main_manager()

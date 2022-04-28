@@ -7,6 +7,9 @@ from models import Event
 from repository import EventRepository
 from repository.redis import RedisCache
 
+from services.exceptions import (EventSpecifiedTimeAlreadyCreated,
+                                 IntersectionEventsError)
+
 from .mail import MailService
 
 
@@ -34,12 +37,16 @@ class EventService:
         return self._repository.get_all_by_creator(**event)
 
     def create(self, email: str, **event) -> bool:
+        if self._repository.is_overlaps_datetime(**event):
+            raise IntersectionEventsError()
+
+        if self._repository.is_overlaps_event_creator(**event):
+            raise EventSpecifiedTimeAlreadyCreated()
+
         operation = "create"
-        if not self._repository.is_overlaps_datetime(**event):
-            instance = self._repository.model(**event)
-            key = self._put_in_cache(instance, operation)
-            self._send(email, key, operation, [event])
-            return True
+        instance = self._repository.model(**event)
+        key = self._put_in_cache(instance, operation)
+        self._send(email, key, operation, [event])
 
     def delete(self, email: str, events: List[Event]):
         operation = "delete"
@@ -47,12 +54,17 @@ class EventService:
         self._send(email, key, operation, events)
 
     def change(self, email: str, instance: Event, **event) -> bool:
+        if self._repository.is_overlaps_excluding_event(**event):
+            raise IntersectionEventsError()
+
         operation = "change"
-        if not self._repository.is_overlaps_excluding_event(**event):
-            instance = self._repository.update(instance, **event)
-            key = self._put_in_cache(instance, operation)
-            self._send(email, key, operation, [instance])
-            return True
+        instance = self._repository.update(instance, **event)
+
+        if self._repository.is_overlaps_event_creator_excluding_event(**instance.to_dict()):
+            raise EventSpecifiedTimeAlreadyCreated()
+
+        key = self._put_in_cache(instance, operation)
+        self._send(email, key, operation, [instance])
 
     def do_task(self, operation, data):
         if operation == "create":
@@ -61,26 +73,31 @@ class EventService:
             return self._change(**data)
         elif operation == "delete":
             return self._delete(data)
-        else:
-            return False
 
     def _crate(self, **event):
-        if not self._repository.is_overlaps_datetime(**event):
-            self._repository.insert(**event)
-            self._repository.session_commit()
-            return True
+        if self._repository.is_overlaps_datetime(**event):
+            raise IntersectionEventsError()
+
+        if self._repository.is_overlaps_event_creator(**event):
+            raise EventSpecifiedTimeAlreadyCreated()
+
+        self._repository.insert(**event)
+        self._repository.session_commit()
 
     def _change(self, **event):
-        if not self._repository.is_overlaps_excluding_event(**event):
-            instance = self._repository.get_by_id(event.get("uid"))
-            self._repository.update(instance, **event) is not None
-            self._repository.session_commit()
-            return True
+        if self._repository.is_overlaps_excluding_event(**event):
+            raise IntersectionEventsError()
+
+        if self._repository.is_overlaps_event_creator_excluding_event(**event):
+            raise EventSpecifiedTimeAlreadyCreated()
+
+        instance = self._repository.get_by_id(event.get("uid"))
+        self._repository.update(instance, **event)
+        self._repository.session_commit()
 
     def _delete(self, events: List[Event]):
         self._repository.delete_many_events(events)
         self._repository.session_commit()
-        return True
 
     def _put_in_cache(self, instance: Any, operation: str) -> UUID:
         key = uuid4()

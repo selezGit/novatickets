@@ -8,28 +8,24 @@ def ceil_dt(dt: datetime, delta: timedelta) -> str:
     return (dt + (datetime.min - dt) % delta).strftime("%H:%M")
 
 
-def set_style_button(
-    state: str,
-    x: int,
-    y: int,
-) -> str:
+def set_style_button(state: str, x: int, y: int) -> str:
     """function sets styles for buttons"""
     return f"""
-        div:nth-child(6) > div:nth-child({y}) > div:nth-child(1) > div > div:nth-child({x}) > div > button {{
+        div:nth-child(8) > div:nth-child({y}) > div:nth-child(1) > div > div:nth-child({x}) > div > button {{
         border-color: {COLORS[state]};
         border-width: 2px;
         width:6em;
-        border-radius: 20px;
+        border-radius: 10px;
         height:2em;
         color:#fffffff;
         padding: -15px;
         margin-bottom: -15px;
     }}
-    div:nth-child(6) > div:nth-child({y}) > div:nth-child(1) > div > div:nth-child({x}) > div > button:hover {{
+    div:nth-child(8) > div:nth-child({y}) > div:nth-child(1) > div > div:nth-child({x}) > div > button:hover {{
         background-color: #ff4c4c;
         border-width: 2px;
         width:6em;
-        border-radius: 20px;
+        border-radius: 10px;
         height:2em;
         color:#ffffff;
         padding: -15px;

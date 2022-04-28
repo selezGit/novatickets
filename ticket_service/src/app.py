@@ -5,6 +5,7 @@ from core.config import CONSUMER_HOST, MSG_TEMPLATE
 from db.redis import redis_handler
 from repository.redis import RedisCache
 from services.event import EventService
+from services.exceptions import EventSpecifiedTimeAlreadyCreated, IntersectionEventsError
 
 app = Flask(__name__)
 
@@ -14,21 +15,27 @@ class ConfirmView(MethodView):
     _event = EventService()
 
     def get(self):
-
         args = request.args
         key = args.get("key")
 
-        context = {}
+        context = {
+            "title": "Error",
+            "message": "Ссылка уже активирована либо срок действия ссылки истёк",
+        }
         if key and self._cache.exists(key):
             data, operation = self._cache.get(key)
-            if self._event.do_task(operation, data):
 
+            try:
+                self._event.do_task(operation, data)
                 context["title"] = f"Success"
                 context["message"] = MSG_TEMPLATE[operation]
-                return render_template("base.html", context=context)
 
-        context["title"] = f"Error"
-        context["message"] = f"Ссылка уже активирована либо срок действия ссылки истёк"
+            except (
+                IntersectionEventsError,
+                EventSpecifiedTimeAlreadyCreated,
+            ) as error:
+                context["message"] = error
+
         return render_template("base.html", context=context)
 
 
