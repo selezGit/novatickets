@@ -45,7 +45,7 @@ class BaseView:
             st.session_state.end_date = (start + timedelta(minutes=30)).date()
             st.session_state.end_time = (start + timedelta(minutes=30)).strftime("%H:%M")
 
-    def date_widget(
+    def main_widget(
         self,
     ) -> None:
         today = datetime.now()
@@ -54,7 +54,8 @@ class BaseView:
             today = today.date() + timedelta(days=1)
 
         st.checkbox("Весь день", key="all_day")
-        col1, col2 = st.columns([2, 3])
+
+        col1, col2, col3 = st.columns([1, 1, 4])
         with col1:
             st.date_input(
                 "Начальная дата",
@@ -73,11 +74,10 @@ class BaseView:
                 key="end_date",
                 disabled=st.session_state.all_day,
             )
+            st.selectbox("Выберите комнату", ROOMS, key="room", on_change=self.set_room)
 
         with col2:
-
             start_index = 0
-
             if today.date() == st.session_state.end_date:
                 start_index = TIME.index(ceil_dt(today, timedelta(minutes=30)))
 
@@ -100,6 +100,10 @@ class BaseView:
                 disabled=st.session_state.all_day,
                 format_func=lambda x: self.format_time(x),
             )
+        with col3:
+            start, end = self._get_start_end_date()
+            self.booking(start, end)
+            self.status(start, end)
 
     @staticmethod
     def btn_callback(btn: int):
@@ -133,45 +137,50 @@ class BaseView:
 
         return button_dict
 
-    def button_widget(self):
-        colls = [i for i in st.columns([1, 1, 1, 1])]
+    def button_widget(self, offset: int):
+        colls = [i for i in st.columns([1, 1, 1, 9])]
         style = ""
+        len_colls = len(colls)
         places_count = ROOMS[st.session_state.room]["places"]
         reserved_places = self._get_reserved_places()
 
         for y, col in enumerate(colls):
             with col:
                 x = 1
-                for i in range((y * (places_count // len(colls))) + 1, ((places_count // len(colls)) * (y + 1)) + 1):
-                    st.button(f"Place {i}", key=f"button{i}", on_click=self.btn_callback, args=(i,))
+                for i in range((y * (places_count // len_colls)) + 1, ((places_count // len_colls) * (y + 1)) + 1):
+                    st.button(f"Место {i}", key=f"button{i}", on_click=self.btn_callback, args=(i,))
                     if i in reserved_places:
                         style += set_style_button(
                             reserved_places[i],
                             x=x,
                             y=y + 1,
+                            offset=offset,
                         )
                     else:
                         style += set_style_button(
                             "green",
                             x=x,
                             y=y + 1,
+                            offset=offset,
                         )
 
                     x += 1
-                if y == (len(colls) - 1) and places_count % len(colls) != 0:
-                    for i in range(((places_count // len(colls)) * (y + 1)) + 1, places_count + 1):
-                        st.button(f"Place {i}", key=f"button{i}", on_click=self.btn_callback, args=(i,))
+                if y == (len_colls - 1) and places_count % len_colls != 0:
+                    for i in range(((places_count // len_colls) * (y + 1)) + 1, places_count + 1):
+                        st.button(f"Место {i}", key=f"button{i}", on_click=self.btn_callback, args=(i,))
                         if i in reserved_places:
                             style += set_style_button(
                                 reserved_places[i],
                                 x=x,
                                 y=y + 1,
+                                offset=offset,
                             )
                         else:
                             style += set_style_button(
                                 "green",
                                 x=x,
                                 y=y + 1,
+                                offset=offset,
                             )
                         x += 1
 
@@ -187,23 +196,25 @@ class BaseView:
             st.session_state.place = "1"
 
     def input_email(self):
-        placeholder = st.empty()
 
-        email = placeholder.text_input(
-            "email",
-            placeholder="Введите ваш email",
-            autocomplete="email",
-        )
-        if not email:
-            st.stop()
+        _, col2, _ = st.columns(3)
+        with col2:
+            placeholder = st.empty()
+            email = placeholder.text_input(
+                "email",
+                placeholder="Введите ваш email",
+                autocomplete="email",
+            )
+            if not email:
+                st.stop()
 
-        if email and "@" in email and email.split("@")[1] in WHITE_LIST:
-            placeholder.empty()
-            st.session_state.email = email.strip()
-            return
-        else:
-            st.warning("Введите пожалуйста корректный email или обратитесь в службу поддержки sa@novardis.com")
-            st.stop()
+            if email and "@" in email and email.split("@")[1] in WHITE_LIST:
+                placeholder.empty()
+                st.session_state.email = email.strip()
+                return
+            else:
+                st.warning("Введите пожалуйста корректный email или обратитесь в службу поддержки sa@novardis.com")
+                st.stop()
 
     def booking(self, start, end):
         st.caption("Бронирование:")

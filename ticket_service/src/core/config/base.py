@@ -4,26 +4,29 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.pa
 TEMPLATE_DIR = BASE_DIR + "src" + os.sep + "templates" + os.sep
 
 # email conf
-SENDER_MAIL = os.getenv("SENDER_MAIL", "")
-SENDER_PASSWORD = os.getenv("SENDER_PASSWORD", "")
+# You need set this environment variables:
+# SENDER_MAIL
+# SENDER_PASSWORD
 
 
 # Redis conf
-REDIS_HOST = os.getenv("REDIS_HOST", "127.0.0.1")
-REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
-REDIS_PASS = os.getenv("REDIS_PASS", "")
+# You need set this environment variables:
+# REDIS_HOST
+# REDIS_PORT
+# REDIS_PASS
 CACHE_EXPIRE_IN_SECONDS = 60 * 60 * 24
 
 
 # Postgresql
-DB = {
-    "DIALECT": os.getenv("DB_DIALECT", "postgresql+psycopg2"),
-    "HOST": os.getenv("DB_HOST"),
-    "PORT": os.getenv("DB_PORT"),
-    "NAME": os.getenv("DB_NAME"),
-    "USER": os.getenv("DB_USER"),
-    "PASSWORD": os.getenv("DB_PASSWORD"),
-}
+# You need set this environment variables:
+# DB = {
+#     "DIALECT": os.getenv("DB_DIALECT", "postgresql+psycopg2"),
+#     "HOST": os.getenv("DB_HOST"),
+#     "PORT": os.getenv("DB_PORT"),
+#     "NAME": os.getenv("DB_NAME"),
+#     "USER": os.getenv("DB_USER"),
+#     "PASSWORD": os.getenv("DB_PASSWORD"),
+# }
 
 # app settings
 ROOMS = {
@@ -37,15 +40,16 @@ COLORS = {
     "red": "#FF0000",
 }
 
-WHITE_LIST = [".com", ".ru"]
-MANAGERS = []
-MANAGER_PASSWORD = os.getenv("MANAGER_PASSWORD")
+# You need set this environment variables:
+# WHITE_LIST = []
+# MANAGER_LIST = []
+# MANAGER_PASSWORD = os.getenv("MANAGER_PASSWORD")
 
 
-CONSUMER_HOST = os.getenv("CONSUMER_HOST")
-CONSUMER_PORT = os.getenv("CONSUMER_PORT")
-
-CACHE_URL = f"http://{CONSUMER_HOST}:{CONSUMER_PORT}/confirm?key="
+# You need set this environment variables:
+# CONSUMER_HOST = os.getenv("CONSUMER_HOST")
+# CONSUMER_PORT = os.getenv("CONSUMER_PORT")
+# CACHE_URL = f"http://{CONSUMER_HOST}:{CONSUMER_PORT}/confirm?key="
 
 OPERATIONS = {
     "change": "изменения",
@@ -116,8 +120,3 @@ STREAMLIT_STYLES = """ <style>
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     </style> """
-
-try:
-    from .local import *
-except ImportError:
-    pass

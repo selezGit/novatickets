@@ -1,5 +1,6 @@
 [theme]
-font="sans serif"
+font="serif"
+
 
 [server]
 port = 8080

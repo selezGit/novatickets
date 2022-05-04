@@ -1,4 +1,4 @@
-from view.streamlit_app import ViewApp
+from view.main_view import ViewApp
 
 if __name__ == "__main__":
     view = ViewApp()
