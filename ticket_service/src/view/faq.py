@@ -12,7 +12,7 @@ class FAQView(BaseView):
 
     def main_faq(self):
 
-        st.title("Оглавление", anchor="main")
+        st.title("FAQ", anchor="main")
         st.markdown(
             """ 
         ##### 1. [Забронировать рабочее место](#Create)
@@ -37,7 +37,7 @@ class FAQView(BaseView):
 
         st.markdown("---")
         st.subheader("Изменить бронирование", anchor="Change")
-        st.write("1. Для для изменения бронирования нажмите нажмите")
+        st.write("1. Для изменения бронирования нажмите нажмите")
         st.image(self.open_image("change_btn.png"))
         st.write("2. Выберите нужное событие в выпадающем меню")
         st.image(self.open_image("change_window.png"))
