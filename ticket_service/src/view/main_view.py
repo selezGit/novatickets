@@ -1,3 +1,4 @@
+from datetime import datetime
 import streamlit as st
 from core.config import BASE_DIR, MANAGER_LIST
 from streamlit_option_menu import option_menu
@@ -39,6 +40,12 @@ class ViewApp(
 
         if not "all_day" in st.session_state:
             st.session_state.all_day = False
+
+        if not "start_datetime" in st.session_state:
+            st.session_state.start_datetime = datetime.now()
+
+        if not "end_datetime" in st.session_state:
+            st.session_state.end_datetime = datetime.now()
 
         with st.sidebar:
             st.markdown(f"### {st.session_state.email}")

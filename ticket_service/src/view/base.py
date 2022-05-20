@@ -1,5 +1,5 @@
 from datetime import datetime, time, timedelta
-from typing import Dict, Tuple
+from typing import Dict
 
 import streamlit as st
 from core.config import ROOMS, STREAMLIT_STYLES, TIME, WHITE_LIST
@@ -10,7 +10,7 @@ from services.event import EventService
 class BaseView:
     _event = EventService()
 
-    def _get_start_end_date(self) -> Tuple[datetime, datetime]:
+    def _update_start_end_date(self):
         sdt = st.session_state.start_date
         edt = st.session_state.end_date
 
@@ -18,12 +18,11 @@ class BaseView:
         etm = datetime.strptime(st.session_state.end_time, "%H:%M").time()
 
         if not st.session_state.all_day:
-            start = datetime.combine(sdt, stm)
-            end = datetime.combine(edt, etm)
+            st.session_state.start_datetime = datetime.combine(sdt, stm)
+            st.session_state.end_datetime = datetime.combine(edt, etm)
         else:
-            start = datetime.combine(sdt, time(0, 0))
-            end = datetime.combine(sdt + timedelta(days=1), time(0, 0))
-        return start, end
+            st.session_state.start_datetime = datetime.combine(sdt, time(0, 0))
+            st.session_state.end_datetime = datetime.combine(sdt + timedelta(days=1), time(0, 0))
 
     def format_time(self, end_time) -> str:
         if st.session_state.start_date != st.session_state.end_date or st.session_state.all_day:
@@ -39,19 +38,13 @@ class BaseView:
 
         return f"{end_time} ({duration} hours)"
 
-    def set_datetime(self):
-        start, end = self._get_start_end_date()
-        if start >= end:
-            st.session_state.end_date = (start + timedelta(minutes=30)).date()
-            st.session_state.end_time = (start + timedelta(minutes=30)).strftime("%H:%M")
-
     def main_widget(
         self,
     ) -> None:
         today = datetime.now()
 
         if today.time() > time(23, 0):
-            today = today.date() + timedelta(days=1)
+            today = today + timedelta(days=1)
 
         st.checkbox("Весь день", key="all_day")
 
@@ -61,7 +54,7 @@ class BaseView:
                 "Начальная дата",
                 min_value=today,
                 value=today,
-                on_change=self.set_datetime,
+                on_change=self._update_start_end_date,
                 key="start_date",
             )
 
@@ -70,7 +63,7 @@ class BaseView:
                 min_value=st.session_state.start_date,
                 max_value=st.session_state.start_date + timedelta(days=3),
                 value=st.session_state.start_date,
-                on_change=self.set_datetime,
+                on_change=self._update_start_end_date,
                 key="end_date",
                 disabled=st.session_state.all_day,
             )
@@ -78,7 +71,8 @@ class BaseView:
 
         with col2:
             start_index = 0
-            if today.date() == st.session_state.end_date:
+
+            if today.date() <= st.session_state.end_date and not today.time() > time(23, 0):
                 start_index = TIME.index(ceil_dt(today, timedelta(minutes=30)))
 
             start_time = st.selectbox(
@@ -86,7 +80,7 @@ class BaseView:
                 TIME,
                 index=start_index,
                 key="start_time",
-                on_change=self.set_datetime,
+                on_change=self._update_start_end_date,
                 disabled=st.session_state.all_day,
             )
 
@@ -96,14 +90,13 @@ class BaseView:
                 "Конечное время",
                 TIME[end_index:],
                 key="end_time",
-                on_change=self.set_datetime,
+                on_change=self._update_start_end_date,
                 disabled=st.session_state.all_day,
                 format_func=lambda x: self.format_time(x),
             )
         with col3:
-            start, end = self._get_start_end_date()
-            self.booking(start, end)
-            self.status(start, end)
+            self.booking()
+            self.status()
 
     @staticmethod
     def btn_callback(btn: int):
@@ -117,15 +110,13 @@ class BaseView:
         )
 
     def _get_reserved_places(self) -> Dict[int, str]:
-        start, end = self._get_start_end_date()
-
-        full_interval = calculate_index(start, end)
+        full_interval = calculate_index(st.session_state.start_datetime, st.session_state.end_datetime)
 
         button_dict = {}
 
         for place, events in self._event.get_all_buttons(
-            start_date=start,
-            end_date=end,
+            start_date=st.session_state.start_datetime,
+            end_date=st.session_state.end_datetime,
             room=st.session_state.room,
         ).items():
             interval = sum(calculate_index(event.start_date, event.end_date) for event in events)
@@ -216,27 +207,27 @@ class BaseView:
                 st.warning("Введите пожалуйста корректный email или обратитесь в службу поддержки sa@novardis.com")
                 st.stop()
 
-    def booking(self, start, end):
+    def booking(self):
         st.caption("Бронирование:")
-
+        self._update_start_end_date()
         st.markdown(
             f"""
             ```python
             Комната: {st.session_state.room} Место: {st.session_state.place}
-            Начало: {to_readable_format(start)}
-            Конец: {to_readable_format(end)}
+            Начало: {to_readable_format(st.session_state.start_datetime)}
+            Конец: {to_readable_format(st.session_state.end_datetime)}
             ```
         """
         )
 
-    def status(self, start, end):
+    def status(self):
         status = [
             self.conversion_item(item)
             for item in self._event.get_all(
                 room=st.session_state.room,
                 place=st.session_state.place,
-                start_date=start,
-                end_date=end,
+                start_date=st.session_state.start_datetime,
+                end_date=st.session_state.end_datetime,
             )
         ]
         st.caption("Текущий статус:")

@@ -1,8 +1,7 @@
 import streamlit as st
 from core.utils import to_readable_format
 from models import Event
-from services.exceptions import (EventSpecifiedTimeAlreadyCreated,
-                                 IntersectionEventsError)
+from services.exceptions import EventSpecifiedTimeAlreadyCreated, IntersectionEventsError
 
 from view.base import BaseView
 
@@ -20,7 +19,6 @@ class CreateView(BaseView):
     def main_create(self):
         placeholder = st.empty()
         self.main_widget()
-        start, end = self._get_start_end_date()
         self.button_widget(6)
         submit = st.button("Забронировать")
 
@@ -29,8 +27,8 @@ class CreateView(BaseView):
                 try:
                     self._event.create(
                         email=st.session_state.email,
-                        start_date=start,
-                        end_date=end,
+                        start_date=st.session_state.start_datetime,
+                        end_date=st.session_state.end_datetime,
                         creator=st.session_state.email,
                         room=st.session_state.room,
                         place=str(st.session_state.place),
