@@ -18,4 +18,10 @@ Novatickets is a service for booking workplaces in the office.
 # Usage
 Before starting the project, you need to run redis and postgresql + specify the connection settings to them in the file ticket_service/src/core/config/config.py
 
-    python ticket_service/src/main.py 
+    cd ticket_service/src
+    python main.py
+
+
+# demo
+
+![](ticket_service/src/static/img/demo.gif)
