@@ -1,0 +1,12 @@
+streamlit==1.8.1
+orjson==3.6.7
+pydantic==1.9.0
+aioredis==2.0.1
+sqlalchemy==1.4.35
+psycopg2-binary==2.9.3
+streamlit-option-menu==0.3.2
+Flask==2.1.0
+SQLAlchemy-serializer==1.4.1
+Jinja2==3.1.1
+uwsgi==2.0.20
+redis==4.2.2

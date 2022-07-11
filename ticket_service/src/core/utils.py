@@ -31,7 +31,6 @@ def set_style_button(state: str, x: int, y: int, offset: int) -> str:
     """
 
 
-# 6em
 def calculate_index(start, end) -> float:
     """Function counts the number of time slots between two dates"""
     return (end - start) / timedelta(minutes=30)

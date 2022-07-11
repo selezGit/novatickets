@@ -77,7 +77,7 @@ class BaseView:
 
             start_time = st.selectbox(
                 "Начальное время",
-                TIME,
+                options=TIME[:-1],
                 index=start_index,
                 key="start_time",
                 on_change=self._update_start_end_date,
@@ -88,7 +88,7 @@ class BaseView:
 
             st.selectbox(
                 "Конечное время",
-                TIME[end_index:],
+                options=TIME[end_index:],
                 key="end_time",
                 on_change=self._update_start_end_date,
                 disabled=st.session_state.all_day,
@@ -201,7 +201,7 @@ class BaseView:
 
             if email and "@" in email and email.split("@")[1] in WHITE_LIST:
                 placeholder.empty()
-                st.session_state.email = email.strip()
+                st.session_state.email = email.strip().lower()
                 return
             else:
                 st.warning("Введите пожалуйста корректный email или обратитесь в службу поддержки sa@novardis.com")
