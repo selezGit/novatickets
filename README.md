@@ -13,15 +13,15 @@ Novatickets is a service for booking workplaces in the office.
 # Installation
     git clone https://github.com/selezGit/novatickets.git
     cd novatickets/
-    pip install -r ticket_service/requirements/base.txt
+    pip install -r requirements/base.txt
 
 # Usage
 Before starting the project, you need to run redis and postgresql + specify the connection settings to them in the file ticket_service/src/core/config/config.py
 
-    cd ticket_service/src
+    cd src/
     python main.py
 
 
 # demo
 
-![](ticket_service/src/static/img/demo.gif)
+![](src/static/img/demo.gif)

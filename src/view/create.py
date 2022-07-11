@@ -1,9 +1,7 @@
 import streamlit as st
 from core.utils import format_dict_events, to_readable_format
 from models import Event
-from services.exceptions import (EventSpecifiedTimeAlreadyCreated,
-                                 IntersectionEventsError,
-                                 IntersectionEventsInListError)
+from services.exceptions import EventSpecifiedTimeAlreadyCreated, IntersectionEventsError, IntersectionEventsInListError
 
 from view.base import BaseView
 
@@ -55,7 +53,7 @@ class CreateView(BaseView):
                         st.session_state.events = []
                         self._event.create_all(selected_events)
                     else:
-                        self._event.create(self.get_selected_event())
+                        self._event.create(**self.get_selected_event())
                     placeholder.success("На указанный email отправлено письмо для подтверждения бронирования")
                 except (
                     IntersectionEventsError,

@@ -52,7 +52,7 @@ COLORS = {
 OPERATIONS = {
     "change": "изменения",
     "create": "подтверждения",
-    "create_all": "множественного",
+    "create_all": "подтверждения",
     "delete": "отмены",
 }
 
