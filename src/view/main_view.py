@@ -39,21 +39,19 @@ class ViewApp(
         if not "events" in st.session_state:
             st.session_state.events = []
 
-        if not "is_authorized" in st.session_state:
-            st.session_state.is_authorized = False
+        if not "email" in st.session_state:
+            st.session_state.email = ""
 
-        self._event.auth()
-
-        if st.session_state.token:
-            userdata = self._event.auth.handler_get_userdata()
-            if userdata:
+        if not st.session_state.email:
+            self._event.auth()
+            
+            if st.session_state.token:
+                userdata = self._event.auth.handler_get_userdata()
                 st.session_state.email = userdata["userPrincipalName"]
                 st.session_state.username = userdata["displayName"]
-                st.session_state.is_authorized = True
 
         with st.sidebar:
-
-            if st.session_state.is_authorized:
+            if st.session_state.email:
                 if st.button("Выйти"):
                     self._event.auth.logout()
 
@@ -71,7 +69,7 @@ class ViewApp(
                     orientation="vertical",
                 )
 
-        if not st.session_state.is_authorized:
+        if not st.session_state.email:
             self.main_hello()
         elif selected == "Создать":
             self.main_create()

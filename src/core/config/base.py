@@ -1,7 +1,6 @@
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) + os.sep
-TEMPLATE_DIR = BASE_DIR + "src" + os.sep + "templates" + os.sep
 
 # Postgresql
 # You need set this environment variables:

@@ -14,7 +14,7 @@ class HelloView(BaseView):
         hello_text = f'<p style="font-size: 20px;text-align: center;">Добро пожаловать на страницу бронирования рабочих мест в офисе компании Novardis.</p>'
         st.markdown(hello_text, unsafe_allow_html=True)
 
-        if not st.session_state.is_authorized:
+        if not st.session_state.email:
             _, col, _ = st.columns([2, 2, 1])
             with col:
                 st.button("Войти", on_click=self._event.auth.login)
