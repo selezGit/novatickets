@@ -1,20 +1,10 @@
-import abc
 from typing import Type, TypeVar
 
-from core.config import CACHE_EXPIRE_IN_SECONDS
 from db.postgres import Base, get_db
-from models import Event
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import Select
 
 ModelType = TypeVar("ModelType", bound=Base)
-
-
-class ExpirationCache(abc.ABC):
-    def __init__(self, cache_handler, expire=CACHE_EXPIRE_IN_SECONDS):
-        self.cache_handler = cache_handler
-        self.expire = expire
-        self.model = Event
 
 
 class BaseRepository:

@@ -54,7 +54,7 @@ class EventRepository(BaseRepository):
     def is_overlaps_event_creator_excluding_event(self, **event) -> bool:
         """Проверка пересения, за исключением события которое хотим изменить"""
         return (
-            self._get_one_by_query(self._overlaps_event_creator(**event).filter(self.model.uid != event.get("uid")))
+            self._get_one_by_query(self._overlaps_event_creator(**event).filter(self.model.uid != event.get("instance").uid))
             is not None
         )
 
@@ -83,4 +83,4 @@ class EventRepository(BaseRepository):
 
     def delete_many_events(self, events: List[dict]) -> None:
         """Удаление списка ивентов"""
-        [self.delete_by_id(event.get("uid")) for event in events]
+        [self.delete_by_id(event.uid) for event in events]

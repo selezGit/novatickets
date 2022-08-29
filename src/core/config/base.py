@@ -3,20 +3,6 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) + os.sep
 TEMPLATE_DIR = BASE_DIR + "src" + os.sep + "templates" + os.sep
 
-# email conf
-# You need set this environment variables:
-# SENDER_MAIL
-# SENDER_PASSWORD
-
-
-# Redis conf
-# You need set this environment variables:
-# REDIS_HOST
-# REDIS_PORT
-# REDIS_PASS
-CACHE_EXPIRE_IN_SECONDS = 60 * 60 * 24
-
-
 # Postgresql
 # You need set this environment variables:
 # DB = {
@@ -40,28 +26,6 @@ COLORS = {
     "red": "#FF0000",
 }
 
-# You need set this environment variables:
-# WHITE_LIST = []
-
-
-# You need set this environment variables:
-# CONSUMER_HOST = os.getenv("CONSUMER_HOST")
-# CONSUMER_PORT = os.getenv("CONSUMER_PORT")
-# CACHE_URL = f"http://{CONSUMER_HOST}:{CONSUMER_PORT}/confirm?key="
-
-OPERATIONS = {
-    "change": "изменения",
-    "create": "подтверждения",
-    "create_all": "подтверждения",
-    "delete": "отмены",
-}
-
-MSG_TEMPLATE = {
-    "create": "Бронирование успешно подтверждено.",
-    "create_all": "Бронирование успешно подтверждено.",
-    "change": "Бронирование успешно изменено.",
-    "delete": "Отмена бронирования успешно произведена.",
-}
 
 TIME = [
     "00:00",
@@ -116,6 +80,30 @@ TIME = [
 
 
 STREAMLIT_STYLES = """ <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto');
+    html, body, [class*="css"]  {
+    font-family: 'Roboto', sans;
+    }
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     </style> """
+
+
+
+# Oauth
+    # Application (client) ID of app registration
+    # managed in  https://aad.portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/RegisteredApps page
+# CLIENT_ID = os.getenv("CLIENT_ID") 
+
+ # Application (client) secret of app registration
+# CLIENT_SECRET = os.getenv("CLIENT_SECRET") 
+
+
+# REDIRECT_URI = ""
+# TENANT = os.getenv('TENANT')
+
+# LOGOUT_URL = f"https://login.microsoftonline.com/{TENANT}/oauth2/v2.0/logout?post_logout_redirect_uri={REDIRECT_URI}"
+
+# You can find the proper permission names from this document
+# https://docs.microsoft.com/en-us/graph/permissions-reference
+# SCOPE = ["User.Read"]

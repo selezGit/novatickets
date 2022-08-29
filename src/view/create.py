@@ -1,3 +1,4 @@
+import time
 import streamlit as st
 from core.utils import format_dict_events, to_readable_format
 from models import Event
@@ -7,8 +8,6 @@ from view.base import BaseView
 
 
 class CreateView(BaseView):
-    offset = 9
-
     @st.cache
     def conversion_item(self, item: Event) -> str:
         return f"""
@@ -19,15 +18,10 @@ class CreateView(BaseView):
          """
 
     def main_create(self):
+        self.main_widget(is_create=True)
         placeholder = st.empty()
-        self.main_widget()
-        append_btn = st.button(
-            "➕",
-            key="append_button",
-            help="Несколько бронирований за раз",
-        )
 
-        if append_btn:
+        if st.session_state.append_button:
             try:
                 self.append_events(self.get_selected_event())
             except (
@@ -43,20 +37,21 @@ class CreateView(BaseView):
             format_func=lambda x: format_dict_events(x),
             key="selected_events",
         )
-        self.button_widget(self.offset)
+        self.button_widget()
         submit = st.button("Забронировать")
 
         if submit:
-            with st.spinner("Please wait..."):
-                try:
-                    if selected_events:
-                        st.session_state.events = []
-                        self._event.create_all(selected_events)
-                    else:
-                        self._event.create(**self.get_selected_event())
-                    placeholder.success("На указанный email отправлено письмо для подтверждения бронирования")
-                except (
-                    IntersectionEventsError,
-                    EventSpecifiedTimeAlreadyCreated,
-                ) as error:
-                    placeholder.error(error)
+            try:
+                if selected_events:
+                    st.session_state.events = []
+                    self._event.create_all(selected_events)
+                else:
+                    self._event.create(**self.get_selected_event())
+                placeholder.success("✅ Рабочее место забронировано")
+                time.sleep(1)
+                st.experimental_rerun()
+            except (
+                IntersectionEventsError,
+                EventSpecifiedTimeAlreadyCreated,
+            ) as error:
+                placeholder.error(error)

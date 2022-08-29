@@ -2,7 +2,7 @@ from datetime import datetime, time, timedelta
 from typing import Any, Dict
 
 import streamlit as st
-from core.config import ROOMS, STREAMLIT_STYLES, TIME, WHITE_LIST
+from core.config import ROOMS, STREAMLIT_STYLES, TIME
 from core.utils import (calculate_index, ceil_dt, set_style_button,
                         to_readable_format)
 from services.event import EventService
@@ -10,8 +10,7 @@ from services.event import EventService
 
 class BaseView:
     _event = EventService()
-    offset = 8
-    placeholder = None
+    offset = 7
 
     def _update_start_end_date(self):
         sdt = st.session_state.start_date
@@ -53,6 +52,7 @@ class BaseView:
 
     def main_widget(
         self,
+        is_create: bool = False,
     ) -> None:
         today = datetime.now()
 
@@ -62,7 +62,7 @@ class BaseView:
         col1, col2 = st.columns([1, 1])
         st.checkbox("Весь день", key="all_day")
 
-        col1, col2, col3 = st.columns([1, 1, 4])
+        col1, col2, col3 = st.columns([2, 3, 7])
         with col1:
             st.date_input(
                 "Начальная дата",
@@ -81,9 +81,16 @@ class BaseView:
                 key="end_date",
                 disabled=st.session_state.all_day,
             )
-            st.selectbox("Выберите комнату", ROOMS, key="room", on_change=self.set_room)
 
+            if is_create:
+                st.text("Добавить:")
+                st.button(
+                    "➕",
+                    key="append_button",
+                    help="Несколько бронирований за раз",
+                )
         with col2:
+
             start_index = 0
 
             if today.date() <= st.session_state.end_date and not today.time() > time(23, 0):
@@ -108,7 +115,7 @@ class BaseView:
                 disabled=st.session_state.all_day,
                 format_func=lambda x: self.format_time(x),
             )
-
+            st.selectbox("Кабинет:", ROOMS, key="room", on_change=self.set_room)
         with col3:
             self.booking()
             self.status()
@@ -143,8 +150,9 @@ class BaseView:
 
         return button_dict
 
-    def button_widget(self, offset: int):
-        colls = [i for i in st.columns([1, 1, 1, 9])]
+    def button_widget(self):
+        colls = [i for i in st.columns([1, 1, 1, 3])]
+
         style = ""
         len_colls = len(colls)
         places_count = ROOMS[st.session_state.room]["places"]
@@ -160,14 +168,14 @@ class BaseView:
                             reserved_places[i],
                             x=x,
                             y=y + 1,
-                            offset=offset,
+                            offset=self.offset,
                         )
                     else:
                         style += set_style_button(
                             "green",
                             x=x,
                             y=y + 1,
-                            offset=offset,
+                            offset=self.offset,
                         )
 
                     x += 1
@@ -179,14 +187,14 @@ class BaseView:
                                 reserved_places[i],
                                 x=x,
                                 y=y + 1,
-                                offset=offset,
+                                offset=self.offset,
                             )
                         else:
                             style += set_style_button(
                                 "green",
                                 x=x,
                                 y=y + 1,
-                                offset=offset,
+                                offset=self.offset,
                             )
                         x += 1
 
@@ -200,27 +208,6 @@ class BaseView:
     def set_room(self):
         if ROOMS[st.session_state.room]["places"] < int(st.session_state.place):
             st.session_state.place = "1"
-
-    def input_email(self):
-
-        _, col2, _ = st.columns(3)
-        with col2:
-            placeholder = st.empty()
-            email = placeholder.text_input(
-                "email",
-                placeholder="Введите ваш email",
-                autocomplete="email",
-            )
-            if not email:
-                st.stop()
-
-            if email and "@" in email and email.split("@")[1] in WHITE_LIST:
-                placeholder.empty()
-                st.session_state.email = email.strip()
-                return
-            else:
-                st.warning("Введите пожалуйста корректный email или обратитесь в службу поддержки sa@novardis.com")
-                st.stop()
 
     def booking(self):
         st.caption("Бронирование:")

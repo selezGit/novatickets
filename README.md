@@ -3,11 +3,8 @@ Novatickets is a service for booking workplaces in the office.
 
 ## Components:
 1. **Python 3.8**
-2. **Redis** — Cache service
 3. **Postgres** — DB 
 4. **Sreamlit** - Web view
-5. **Flask** - Request handler
-6. **Nginx** - web serving 
 
 
 # Installation
@@ -19,7 +16,7 @@ Novatickets is a service for booking workplaces in the office.
 Before starting the project, you need to run redis and postgresql + specify the connection settings to them in the file ticket_service/src/core/config/config.py
 
     cd src/
-    python main.py
+    streamlit run main.py
 
 
 # demo
