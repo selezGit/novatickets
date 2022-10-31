@@ -10,9 +10,7 @@ def ceil_dt(dt: datetime, delta: timedelta) -> str:
     """round up function"""
     return (dt + (datetime.min - dt) % delta).strftime("%H:%M")
 
-# /html/body/div/div[1]/div/div/div/div/section[2]/div/div[1]/div/div[8]/div/div[1]/div[1]/div[1]/div/div[1]/div/button
 def set_style_button(state: str, x: int, y: int, offset: int) -> str:
-        # div:nth-child(8) > div > div.css-ocqkz7.e1tzin5v4 > div:nth-child(1) > div:nth-child(1) > div > div:nth-child(1) > div > button
     """function sets styles for buttons"""
     return f"""
         div:nth-child({offset}) > div:nth-child({y}) > div:nth-child(1) > div > div:nth-child({x}) > div > button {{

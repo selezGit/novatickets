@@ -1,10 +1,8 @@
-import base64
 import streamlit as st
 from core.config import BASE_DIR
 from streamlit_option_menu import option_menu
 
 from . import ChangeView, CreateView, DeleteView, FAQView, HelloView
-import extra_streamlit_components as stx
 
 
 class ViewApp(
